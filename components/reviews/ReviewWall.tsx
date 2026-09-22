@@ -17,30 +17,29 @@ type Props = {
 };
 
 export function ReviewWall({ reviews }: Props) {
-  // Take top 4 reviews for mobile view
-  const mobileReviews = reviews.slice(0, 4);
-
   return (
     <div className="h-full w-full">
-      {/* MOBILE VIEW: 2x2 Grid with top padding (pt-8) so badges never clip under header */}
-      <div className="grid h-full w-full grid-cols-2 grid-rows-2 items-center justify-items-center gap-x-2 gap-y-3 px-3 pb-2 pt-8 md:hidden">
-        {mobileReviews.map((review, index) => {
-          const isLatest = index === 0;
+      {/* MOBILE VIEW: Vertical Scrollable Grid (Shows ALL reviews) */}
+      <div className="flex h-full w-full flex-col overflow-y-auto px-4 pb-12 pt-8 md:hidden scrollbar-thin scrollbar-thumb-[#503322]/20">
+        <div className="grid grid-cols-2 gap-x-3 gap-y-10 items-end justify-items-center">
+          {reviews.map((review, index) => {
+            const isLatest = index === 0;
 
-          return (
-            <div
-              key={review.id}
-              className={`flex h-full w-full items-center justify-center transition-all ${
-                isLatest ? "scale-95 z-30" : "scale-90 z-10"
-              }`}
-            >
-              <ReviewCharacter review={review} latest={isLatest} />
-            </div>
-          );
-        })}
+            return (
+              <div
+                key={review.id}
+                className={`flex w-full items-center justify-center transition-all ${
+                  isLatest ? "scale-95 z-30" : "scale-90 z-10"
+                }`}
+              >
+                <ReviewCharacter review={review} latest={isLatest} />
+              </div>
+            );
+          })}
+        </div>
       </div>
 
-      {/* DESKTOP/TABLET VIEW: 2-Row Layout (Up to 10 reviews) */}
+      {/* DESKTOP/TABLET VIEW: Static No-Scroll 2D Grid (Unchanged) */}
       <div className="hidden h-full w-full items-center justify-items-center gap-x-4 gap-y-6 px-6 pb-4 pt-8 md:grid md:grid-cols-4 md:grid-rows-2 lg:grid-cols-5">
         {reviews.map((review, index) => {
           const isLatest = index === 0;

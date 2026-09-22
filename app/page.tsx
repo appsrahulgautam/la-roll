@@ -36,9 +36,8 @@ export default async function HomePage() {
         <AddReviewButton />
       </header>
 
-      {/* Responsive Review Wall Canvas */}
-      {/* AFTER */}
-      <section className="relative flex flex-1 w-full items-center justify-center pt-6 pb-4 md:pt-10 md:pb-8">
+      {/* Replace the main section in app/page.tsx */}
+      <section className="relative flex flex-1 w-full items-center justify-center overflow-y-auto md:overflow-hidden pt-4 pb-4 md:pt-10 md:pb-8">
         <ReviewWall reviews={reviewsData} />
       </section>
     </main>
