@@ -59,57 +59,68 @@ export function ReviewModal({ open, onClose }: Props) {
         inset-0
         z-50
         flex
-        items-center
+        items-end
         justify-center
-        bg-[#503322]/30
-        p-4
+        bg-[#503322]/40
+        p-0
         backdrop-blur-sm
+        sm:items-center
+        sm:p-4
       "
     >
       <div
         className="
           relative
-          max-h-[90vh]
+          max-h-[85vh]
           w-full
           max-w-lg
           overflow-y-auto
-          rounded-[32px]
+          rounded-t-[28px]
           bg-[#fffaf4]
-          p-6
+          p-5
           shadow-2xl
-          md:p-8
+          sm:max-h-[90vh]
+          sm:rounded-[32px]
+          sm:p-8
         "
       >
+        {/* Sticky top mobile handle bar */}
+        <div className="mb-3 flex justify-center sm:hidden">
+          <div className="h-1.5 w-10 rounded-full bg-[#e6d5cf]" />
+        </div>
+
         <button
           onClick={onClose}
           className="
             absolute
-            right-5
-            top-5
+            right-4
+            top-4
             rounded-full
             p-2
             text-[#684535]
             hover:bg-[#f5e9e3]
+            sm:right-5
+            sm:top-5
           "
         >
           <X size={20} />
         </button>
 
-        <div className="pr-10">
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#a08378]">
+        <div className="pr-8 sm:pr-10">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#a08378] sm:text-xs">
             La Roll
           </p>
 
-          <h2 className="mt-2 font-serif text-3xl text-[#503322]">
+          <h2 className="mt-1 font-serif text-2xl text-[#503322] sm:mt-2 sm:text-3xl">
             A little thought.
             <br />A little character.
           </h2>
         </div>
 
-        <div className="mt-7 space-y-5">
+        <div className="mt-5 space-y-4 sm:mt-7 sm:space-y-5">
           {/* Name */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-[#684535]">
+            <label className="mb-1.5 block text-xs font-medium text-[#684535] sm:mb-2 sm:text-sm">
               Your name
             </label>
 
@@ -120,62 +131,70 @@ export function ReviewModal({ open, onClose }: Props) {
               placeholder="What should we call you?"
               className="
                 w-full
-                rounded-2xl
+                rounded-xl
                 border
                 border-[#e6d5cf]
                 bg-white
-                px-4
-                py-3.5
+                px-3.5
+                py-2.5
+                text-sm
                 text-[#503322]
                 outline-none
                 placeholder:text-[#b7a29a]
                 focus:border-[#9b6855]
+                sm:rounded-2xl
+                sm:px-4
+                sm:py-3.5
               "
             />
           </div>
 
           {/* Message */}
           <div>
-            <div className="mb-2 flex items-center justify-between">
-              <label className="text-sm font-medium text-[#684535]">
+            <div className="mb-1.5 flex items-center justify-between sm:mb-2">
+              <label className="text-xs font-medium text-[#684535] sm:text-sm">
                 Your message
               </label>
 
-              <span className="text-xs text-[#a08378]">
+              <span className="text-[10px] text-[#a08378] sm:text-xs">
                 {message.length} / 150
               </span>
             </div>
 
             <textarea
               value={message}
-              onChange={(e) => setMessage(e.target.value.slice(0, 200))}
+              onChange={(e) => setMessage(e.target.value.slice(0, 150))}
               maxLength={150}
-              rows={4}
+              rows={3}
               placeholder="Coffee first. Everything else later ☕"
               className="
                 w-full
                 resize-none
-                rounded-2xl
+                rounded-xl
                 border
                 border-[#e6d5cf]
                 bg-white
-                px-4
-                py-3.5
+                px-3.5
+                py-2.5
+                text-sm
                 text-[#503322]
                 outline-none
                 placeholder:text-[#b7a29a]
                 focus:border-[#9b6855]
+                sm:rounded-2xl
+                sm:px-4
+                sm:py-3.5
               "
             />
           </div>
 
-          {/* Avatar */}
+          {/* Avatar Picker */}
           <div>
-            <label className="mb-3 block text-sm font-medium text-[#684535]">
+            <label className="mb-2 block text-xs font-medium text-[#684535] sm:mb-3 sm:text-sm">
               Pick your little character
             </label>
 
-            <div className="grid grid-cols-3 gap-3 sm:grid-cols-5">
+            <div className="grid grid-cols-4 gap-2 sm:grid-cols-5 sm:gap-3">
               {AVATARS.map((item) => {
                 const selected = avatar === item.id;
 
@@ -185,27 +204,33 @@ export function ReviewModal({ open, onClose }: Props) {
                     type="button"
                     onClick={() => setAvatar(item.id)}
                     className={`
-          flex
-          flex-col
-          items-center
-          rounded-2xl
-          border
-          p-2
-          transition
-          ${
-            selected
-              ? "border-[#69422d] bg-[#f7e5e3]"
-              : "border-[#eadbd5] bg-white hover:bg-[#fff6f2]"
-          }
-        `}
+                      flex
+                      flex-col
+                      items-center
+                      justify-center
+                      rounded-xl
+                      border
+                      p-1.5
+                      transition
+                      active:scale-95
+                      sm:rounded-2xl
+                      sm:p-2
+                      ${
+                        selected
+                          ? "border-[#69422d] bg-[#f7e5e3]"
+                          : "border-[#eadbd5] bg-white hover:bg-[#fff6f2]"
+                      }
+                    `}
                   >
-                    <Avatar
-                      type={item.id}
-                      size={70}
-                      state={selected ? "selected" : "idle"}
-                    />
+                    <div className="flex h-12 w-12 items-center justify-center overflow-hidden sm:h-14 sm:w-14">
+                      <Avatar
+                        type={item.id}
+                        size={52}
+                        state={selected ? "selected" : "idle"}
+                      />
+                    </div>
 
-                    <span className="mt-1 text-[10px] text-[#684535]">
+                    <span className="mt-0.5 max-w-full truncate text-[9px] font-medium text-[#684535] sm:text-[10px]">
                       {item.name}
                     </span>
                   </button>
@@ -220,17 +245,22 @@ export function ReviewModal({ open, onClose }: Props) {
             disabled={loading || !name.trim() || !message.trim()}
             className="
               w-full
-              rounded-2xl
+              rounded-xl
               bg-[#b95745]
-              px-5
-              py-4
-              text-sm
+              px-4
+              py-3
+              text-xs
               font-semibold
               text-white
               transition
               hover:bg-[#a94d3d]
+              active:scale-[0.98]
               disabled:cursor-not-allowed
               disabled:opacity-50
+              sm:rounded-2xl
+              sm:px-5
+              sm:py-4
+              sm:text-sm
             "
           >
             {loading ? "Sending..." : "Send it to the wall →"}
