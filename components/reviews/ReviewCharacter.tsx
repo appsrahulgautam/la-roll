@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Avatar } from "@/components/avatars/Avatar";
 
 type Review = {
@@ -17,13 +17,24 @@ type Review = {
 type Props = {
   review: Review;
   latest?: boolean;
+  index: number;
 };
 
-export function ReviewCharacter({ review, latest = false }: Props) {
+export function ReviewCharacter({ review, latest = false, index }: Props) {
   const [likes, setLikes] = useState(review.likes);
   const [hearts, setHearts] = useState(review.hearts);
   const [loading, setLoading] = useState<"like" | "heart" | null>(null);
   const [reaction, setReaction] = useState<"like" | "heart" | null>(null);
+
+  const walkConfig = useMemo(() => {
+    const direction = index % 2 === 0 ? "ltr" : "rtl";
+    const duration = 20 + ((index * 3) % 12);
+    const bottomOffset = 8 + (index % 3) * 7;
+
+    return { direction, duration, bottomOffset };
+  }, [index]);
+
+  const isLTR = walkConfig.direction === "ltr";
 
   async function react(selectedReaction: "like" | "heart") {
     if (loading) return;
@@ -40,17 +51,11 @@ export function ReviewCharacter({ review, latest = false }: Props) {
     try {
       const response = await fetch(`/api/reviews/${review.id}/reaction`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          reaction: selectedReaction,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reaction: selectedReaction }),
       });
 
-      if (!response.ok) {
-        throw new Error("Reaction failed");
-      }
+      if (!response.ok) throw new Error("Reaction failed");
     } catch {
       if (selectedReaction === "like") {
         setLikes((value) => Math.max(0, value - 1));
@@ -58,81 +63,93 @@ export function ReviewCharacter({ review, latest = false }: Props) {
         setHearts((value) => Math.max(0, value - 1));
       }
     } finally {
-      setTimeout(() => {
-        setReaction(null);
-      }, 1000);
-
+      setTimeout(() => setReaction(null), 1000);
       setLoading(null);
     }
   }
 
   return (
     <motion.div
-      className="relative flex w-full max-w-[230px] flex-col items-center justify-end"
-      initial={
-        latest ? { opacity: 0, y: 70, scale: 0.6 } : { opacity: 0, y: 30 }
-      }
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: latest ? 0.8 : 0.5, ease: "easeOut" }}
+      className="absolute flex flex-col items-center pointer-events-auto"
+      style={{ bottom: `${walkConfig.bottomOffset}%` }}
+      initial={{
+        x: isLTR ? "-25vw" : "125vw",
+        opacity: 0,
+      }}
+      animate={{
+        x: isLTR ? ["-25vw", "125vw"] : ["125vw", "-25vw"],
+        opacity: [0, 1, 1, 0],
+      }}
+      transition={{
+        duration: walkConfig.duration,
+        repeat: Infinity,
+        ease: "linear",
+        delay: index * 1.8,
+        times: [0, 0.05, 0.95, 1],
+      }}
     >
-      {/* FEATURED / LATEST SHIMMER BADGE */}
-      {/* FEATURED / LATEST SHIMMER BADGE */}
+      {/* LATEST MESSAGE BADGE */}
       {latest && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{
-            delay: 0.4,
-            type: "spring",
-            stiffness: 350,
-            damping: 15,
-          }}
-          /* Changed -top-7 to -top-5 on mobile (sm:-top-7 for desktop) to keep it well below the header */
-          className="absolute -top-5 sm:-top-7 left-1/2 z-50 flex -translate-x-1/2 items-center gap-1 rounded-full bg-gradient-to-r from-[#804222] via-[#503322] to-[#804222] px-3 py-0.5 sm:px-3.5 sm:py-1 text-[8px] sm:text-[9px] font-black tracking-[0.2em] text-amber-200 shadow-lg ring-2 ring-amber-300/40"
-        >
-          <span className="animate-pulse text-[9px] sm:text-[10px]">✨</span>
-          <span>NEWEST</span>
-        </motion.div>
+        <div className="mb-1.5 rounded-full bg-[#503322] px-3 py-1 text-[9px] font-bold tracking-[0.2em] text-amber-200 shadow-md sm:text-[10px]">
+          ✦ LATEST MESSAGE
+        </div>
       )}
 
-      {/* SPEECH BUBBLE WITH GOLDEN HIGHLIGHT FOR LATEST */}
-      <motion.div
-        initial={{ opacity: latest ? 0 : 1, y: latest ? 12 : 0 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: latest ? 0.45 : 0, duration: 0.4 }}
-        className="relative z-30 mb-2 w-full"
-      >
+      {/* SPEECH BUBBLE */}
+      <div className="relative z-30 mb-2 w-56 sm:w-72 md:w-80 lg:w-96">
         <div
-          className={`relative rounded-[22px] border px-4 py-3 text-center transition-all ${
+          className={`relative rounded-[24px] border px-4 py-3.5 text-center shadow-xl backdrop-blur-md transition-all ${
             latest
-              ? "border-amber-400/60 bg-[#fffdf9] shadow-[0_8px_30px_rgba(217,119,6,0.25)] ring-2 ring-amber-300/50"
-              : "border-[#503322]/10 bg-[#fffaf5] shadow-[0_6px_20px_rgba(80,51,34,0.12)]"
+              ? "border-amber-400 bg-[#fffdfa]/95 ring-2 ring-amber-300/60 shadow-[0_10px_25px_rgba(217,119,6,0.2)]"
+              : "border-[#503322]/15 bg-[#fffaf5]/95 shadow-lg"
           }`}
         >
-          <p className="line-clamp-3 break-words text-xs font-semibold leading-snug text-[#503322] sm:text-sm">
+          <p className="line-clamp-3 break-words text-xs font-semibold leading-relaxed text-[#503322] sm:text-sm md:text-base">
             {review.message}
           </p>
 
-          {/* Bubble Tail */}
-          <div
-            className={`absolute -bottom-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-r border-b ${
-              latest
-                ? "border-amber-400/60 bg-[#fffdf9]"
-                : "border-[#503322]/10 bg-[#fffaf5]"
-            }`}
-          />
+          <div className="mt-2 flex items-center justify-between text-xs text-[#69422d]/80">
+            <span className="truncate font-bold text-[#503322]">
+              — {review.name}
+            </span>
+            <div className="flex gap-2 font-medium">
+              <button
+                type="button"
+                onClick={() => react("heart")}
+                disabled={loading !== null}
+                className="flex items-center gap-1 rounded-full bg-pink-100/60 px-2 py-0.5 transition hover:scale-110 active:scale-95"
+              >
+                ❤️ <span>{hearts}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => react("like")}
+                disabled={loading !== null}
+                className="flex items-center gap-1 rounded-full bg-blue-100/60 px-2 py-0.5 transition hover:scale-110 active:scale-95"
+              >
+                👍 <span>{likes}</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="absolute -bottom-2 left-1/2 h-3.5 w-3.5 -translate-x-1/2 rotate-45 border-b border-r border-[#503322]/15 bg-[#fffaf5]" />
         </div>
-      </motion.div>
+      </div>
 
-      {/* AVATAR WITH SPOTLIGHT SHADOW FOR LATEST */}
-      <div className="relative z-10 flex h-[135px] sm:h-[165px] w-full items-center justify-center">
-        {latest && (
-          <div className="absolute inset-x-4 bottom-2 top-4 -z-10 rounded-full bg-amber-400/20 blur-xl animate-pulse" />
-        )}
-
+      {/* AVATAR WRAPPER WITH UNIFIED HEIGHT */}
+      <motion.div
+        className="relative z-10 flex h-[130px] w-[130px] items-center justify-center sm:h-[150px] sm:w-[150px]"
+        animate={{ y: [0, -8, 0] }}
+        transition={{
+          duration: 0.65,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        style={{ transform: isLTR ? "scaleX(1)" : "scaleX(-1)" }}
+      >
         <Avatar
           type={review.avatar}
-          size={latest ? 190 : 150}
+          size={140} // Uniform size for ALL avatars
           state={latest ? "new" : "idle"}
           reaction={reaction}
         />
@@ -140,50 +157,15 @@ export function ReviewCharacter({ review, latest = false }: Props) {
         {/* REACTION EMOJI */}
         {reaction && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.5 }}
-            animate={{ opacity: [0, 1, 1, 0], y: -70, scale: [0.5, 1.2, 1] }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            className="pointer-events-none absolute right-2 top-0 z-50 text-3xl"
+            initial={{ opacity: 0, y: 10, scale: 0.5 }}
+            animate={{ opacity: [0, 1, 0], y: -60, scale: [0.5, 1.3, 1] }}
+            transition={{ duration: 1 }}
+            className="pointer-events-none absolute -top-6 z-50 text-3xl sm:text-4xl"
           >
             {reaction === "heart" ? "❤️" : "👍"}
           </motion.div>
         )}
-      </div>
-
-      {/* AUTHOR & REACTION BUTTONS */}
-      <div className="relative z-20 mt-1 flex flex-col items-center">
-        <div
-          className={`mb-1 max-w-[140px] truncate text-center text-xs font-bold ${
-            latest
-              ? "text-[#503322] underline decoration-amber-400 decoration-2 underline-offset-2"
-              : "text-[#503322]"
-          }`}
-        >
-          {review.name}
-        </div>
-
-        <div className="flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 shadow-md backdrop-blur">
-          <button
-            type="button"
-            onClick={() => react("heart")}
-            disabled={loading !== null}
-            className="flex items-center gap-1 rounded-full px-2 py-0.5 text-xs transition hover:bg-pink-50 active:scale-90"
-          >
-            <span>❤️</span>
-            <span className="font-medium text-[#503322]">{hearts}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => react("like")}
-            disabled={loading !== null}
-            className="flex items-center gap-1 rounded-full px-2 py-0.5 text-xs transition hover:bg-blue-50 active:scale-90"
-          >
-            <span>👍</span>
-            <span className="font-medium text-[#503322]">{likes}</span>
-          </button>
-        </div>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }
