@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { ReviewCharacter } from "./ReviewCharacter";
 
 type Review = {
@@ -18,20 +17,8 @@ type Props = {
 };
 
 export function ReviewWall({ reviews }: Props) {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  // Show top 6 on mobile, top 10 on desktop
-  const activeReviews = isMobile ? reviews.slice(0, 6) : reviews.slice(0, 10);
+  // Always limit to maximum 6 active items on screen
+  const activeReviews = reviews.slice(0, 6);
 
   return (
     <div className="relative h-full w-full p-0 md:px-8 md:pb-8">
