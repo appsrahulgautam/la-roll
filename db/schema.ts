@@ -32,3 +32,17 @@ export const admins = pgTable("admins", {
   role: adminRoleEnum("role").notNull().default("admin"),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+export const reviews = pgTable("reviews", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  message: varchar("message").notNull(),
+  avatar: varchar("avatar").notNull(),
+  likes: integer("likes").notNull().default(0),
+  hearts: integer("hearts").notNull().default(0),
+  createdAt: timestamp("created_at", {
+    withTimezone: true,
+  })
+    .defaultNow()
+    .notNull(),
+});
