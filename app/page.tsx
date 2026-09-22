@@ -37,7 +37,8 @@ export default async function HomePage() {
       </header>
 
       {/* Responsive Review Wall Canvas */}
-      <section className="relative flex flex-1 w-full items-center justify-center overflow-hidden pb-6 sm:pb-10">
+      {/* AFTER */}
+      <section className="relative flex flex-1 w-full items-center justify-center pt-6 pb-4 md:pt-10 md:pb-8">
         <ReviewWall reviews={reviewsData} />
       </section>
     </main>

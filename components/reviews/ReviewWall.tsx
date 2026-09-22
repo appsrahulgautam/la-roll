@@ -22,8 +22,8 @@ export function ReviewWall({ reviews }: Props) {
 
   return (
     <div className="h-full w-full">
-      {/* MOBILE VIEW: 2x2 Grid (Top 4 reviews shown all at once) */}
-      <div className="grid h-full w-full grid-cols-2 grid-rows-2 items-center justify-items-center gap-x-2 gap-y-3 px-3 py-2 md:hidden">
+      {/* MOBILE VIEW: 2x2 Grid with top padding (pt-8) so badges never clip under header */}
+      <div className="grid h-full w-full grid-cols-2 grid-rows-2 items-center justify-items-center gap-x-2 gap-y-3 px-3 pb-2 pt-8 md:hidden">
         {mobileReviews.map((review, index) => {
           const isLatest = index === 0;
 
@@ -41,7 +41,7 @@ export function ReviewWall({ reviews }: Props) {
       </div>
 
       {/* DESKTOP/TABLET VIEW: 2-Row Layout (Up to 10 reviews) */}
-      <div className="hidden h-full w-full items-center justify-items-center gap-x-4 gap-y-6 overflow-hidden px-6 py-4 md:grid md:grid-cols-4 md:grid-rows-2 lg:grid-cols-5">
+      <div className="hidden h-full w-full items-center justify-items-center gap-x-4 gap-y-6 px-6 pb-4 pt-8 md:grid md:grid-cols-4 md:grid-rows-2 lg:grid-cols-5">
         {reviews.map((review, index) => {
           const isLatest = index === 0;
           const isTopRow = Math.floor(index / 5) === 0;

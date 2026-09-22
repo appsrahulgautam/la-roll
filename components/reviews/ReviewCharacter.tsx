@@ -76,6 +76,7 @@ export function ReviewCharacter({ review, latest = false }: Props) {
       transition={{ duration: latest ? 0.8 : 0.5, ease: "easeOut" }}
     >
       {/* FEATURED / LATEST SHIMMER BADGE */}
+      {/* FEATURED / LATEST SHIMMER BADGE */}
       {latest && (
         <motion.div
           initial={{ opacity: 0, scale: 0, y: 10 }}
@@ -86,9 +87,10 @@ export function ReviewCharacter({ review, latest = false }: Props) {
             stiffness: 350,
             damping: 15,
           }}
-          className="absolute -top-7 left-1/2 z-50 flex -translate-x-1/2 items-center gap-1 rounded-full bg-gradient-to-r from-[#804222] via-[#503322] to-[#804222] px-3.5 py-1 text-[9px] font-black tracking-[0.2em] text-amber-200 shadow-lg ring-2 ring-amber-300/40"
+          /* Changed -top-7 to -top-5 on mobile (sm:-top-7 for desktop) to keep it well below the header */
+          className="absolute -top-5 sm:-top-7 left-1/2 z-50 flex -translate-x-1/2 items-center gap-1 rounded-full bg-gradient-to-r from-[#804222] via-[#503322] to-[#804222] px-3 py-0.5 sm:px-3.5 sm:py-1 text-[8px] sm:text-[9px] font-black tracking-[0.2em] text-amber-200 shadow-lg ring-2 ring-amber-300/40"
         >
-          <span className="animate-pulse text-[10px]">✨</span>
+          <span className="animate-pulse text-[9px] sm:text-[10px]">✨</span>
           <span>NEWEST</span>
         </motion.div>
       )}
