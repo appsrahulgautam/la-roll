@@ -14,21 +14,25 @@ export function AddReviewButton() {
         className="
           flex
           items-center
-          gap-2
+          gap-1.5
           rounded-full
           bg-[#69422d]
-          px-5
-          py-3
-          text-sm
+          px-3.5
+          py-2
+          text-xs
           font-medium
           text-white
           shadow-sm
           transition
           hover:scale-[1.03]
           active:scale-95
+          sm:gap-2
+          sm:px-5
+          sm:py-3
+          sm:text-sm
         "
       >
-        <Plus size={16} />
+        <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
 
         <span className="hidden sm:inline">Leave a little note</span>
 
