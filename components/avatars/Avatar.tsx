@@ -1,79 +1,63 @@
 "use client";
 
-import { Bear } from "./Bear";
-import { Hedgehog } from "./Hedgehog";
-import { Deer } from "./Deer";
-import { Owl } from "./Owl";
-import { Raccoon } from "./Raccoon";
-import { Squirrel } from "./Squirrel";
+import { BunnyAvatar } from "./BunnyAvatar";
+import { BearAvatar } from "./BearAvatar";
+import { CatAvatar } from "./CatAvatar";
+import { DuckAvatar } from "./DuckAvatar";
+import { ElephantAvatar } from "./ElephantAvatar";
+import { GiraffeAvatar } from "./GiraffeAvatar";
+import { PandaAvatar } from "./PandaAvatar";
+import { LlamaAvatar } from "./LlamaAvatar";
+import { FrogAvatar } from "./FrogAvatar";
+import { MonkeyAvatar } from "./MonkeyAvatar";
+import { RobotAvatar } from "./RobotAvatar";
+import { FoxAvatar } from "./FoxAvatar";
+import { OstrichAvatar } from "./OstrichAvatar";
+import { WolfAvatar } from "./WolfAvatar";
 
-import { Puppy } from "./Puppy";
-import { Turtle } from "./Turtle";
-import { Lion } from "./Lion";
-import { Octopus } from "./Octopus";
-import { Mouse } from "./Mouse";
-
-export type AvatarState = "idle" | "new" | "selected";
-export type AvatarReaction = "like" | "heart" | null;
-
-export type AvatarProps = {
+type Props = {
   type: string;
   size?: number;
-  state?: AvatarState;
-  reaction?: AvatarReaction;
+  state?: "idle" | "selected" | "new";
+  reaction?: "like" | "heart" | null;
 };
 
 export function Avatar({
   type,
-  size = 220,
+  size = 95,
   state = "idle",
   reaction = null,
-}: AvatarProps) {
-  const props = {
-    size,
-    state,
-    reaction,
-  };
+}: Props) {
+  const k = type.toLowerCase();
 
-  switch (type) {
-    // Original 10
-    case "bear":
-      return <Bear {...props} />;
+  if (k.includes("panda"))
+    return <PandaAvatar size={size} state={state} reaction={reaction} />;
+  if (k.includes("llama"))
+    return <LlamaAvatar size={size} state={state} reaction={reaction} />;
+  if (k.includes("frog"))
+    return <FrogAvatar size={size} state={state} reaction={reaction} />;
+  if (k.includes("monkey"))
+    return <MonkeyAvatar size={size} state={state} reaction={reaction} />;
+  if (k.includes("robot"))
+    return <RobotAvatar size={size} state={state} reaction={reaction} />;
+  if (k.includes("fox"))
+    return <FoxAvatar size={size} state={state} reaction={reaction} />;
+  if (k.includes("ostrich"))
+    return <OstrichAvatar size={size} state={state} reaction={reaction} />;
+  if (k.includes("wolf"))
+    return <WolfAvatar size={size} state={state} reaction={reaction} />;
+  if (k.includes("bunny"))
+    return <BunnyAvatar size={size} state={state} reaction={reaction} />;
+  if (k.includes("bear"))
+    return <BearAvatar size={size} state={state} reaction={reaction} />;
+  if (k.includes("cat"))
+    return <CatAvatar size={size} state={state} reaction={reaction} />;
+  if (k.includes("duck"))
+    return <DuckAvatar size={size} state={state} reaction={reaction} />;
+  if (k.includes("elephant"))
+    return <ElephantAvatar size={size} state={state} reaction={reaction} />;
+  if (k.includes("giraffe"))
+    return <GiraffeAvatar size={size} state={state} reaction={reaction} />;
 
-    // Characters 11–15
-    case "hedgehog":
-      return <Hedgehog {...props} />;
-
-    case "deer":
-      return <Deer {...props} />;
-
-    case "owl":
-      return <Owl {...props} />;
-
-    case "raccoon":
-      return <Raccoon {...props} />;
-
-    case "squirrel":
-      return <Squirrel {...props} />;
-
-    // Characters 16–20
-    case "puppy":
-      return <Puppy {...props} />;
-
-    case "turtle":
-      return <Turtle {...props} />;
-
-    case "lion":
-      return <Lion {...props} />;
-
-    case "octopus":
-      return <Octopus {...props} />;
-
-    case "mouse":
-      return <Mouse {...props} />;
-
-    // Safe fallback
-    default:
-      return <Bear {...props} />;
-  }
+  return <PandaAvatar size={size} state={state} reaction={reaction} />;
 }

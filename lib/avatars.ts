@@ -1,57 +1,78 @@
-export type AvatarDefinition = {
+export type AvatarItem = {
   id: string;
   name: string;
+  image: string;
 };
 
-export const AVATARS: AvatarDefinition[] = [
-  // Original 10
+export const AVATARS: AvatarItem[] = [
+  {
+    id: "bunny",
+    name: "Bunny",
+    image: "/avatars/bunny.png",
+  },
   {
     id: "bear",
-    name: "Bobby Bear",
-  },
-
-
-  // Characters 11–15
-  {
-    id: "hedgehog",
-    name: "Haru Hedgehog",
+    name: "Bear",
+    image: "/avatars/bear.png",
   },
   {
-    id: "deer",
-    name: "Daisy Deer",
+    id: "cat",
+    name: "Cool Cat",
+    image: "/avatars/cat.png",
   },
   {
-    id: "owl",
-    name: "Ollie Owl",
+    id: "duck",
+    name: "Duck",
+    image: "/avatars/duck.png",
   },
   {
-    id: "raccoon",
-    name: "Rico Raccoon",
+    id: "elephant",
+    name: "Elephant",
+    image: "/avatars/elephant.png",
   },
   {
-    id: "squirrel",
-    name: "Suki Squirrel",
-  },
-
-  // Characters 16–20
-  {
-    id: "puppy",
-    name: "Poppy Puppy",
+    id: "giraffe",
+    name: "Giraffe",
+    image: "/avatars/giraffe.png",
   },
   {
-    id: "turtle",
-    name: "Toby Turtle",
+    id: "panda",
+    name: "Panda",
+    image: "/avatars/panda.png",
   },
   {
-    id: "lion",
-    name: "Leo Lion",
+    id: "llama",
+    name: "Llama",
+    image: "/avatars/llama.png",
   },
   {
-    id: "octopus",
-    name: "Penny Octopus",
+    id: "frog",
+    name: "Frog",
+    image: "/avatars/frog.png",
   },
   {
-    id: "mouse",
-    name: "Mimi Mouse",
+    id: "monkey",
+    name: "Monkey",
+    image: "/avatars/monkey.png",
+  },
+  {
+    id: "robot",
+    name: "Robot",
+    image: "/avatars/robot.png",
+  },
+  {
+    id: "fox",
+    name: "Sleepy Fox",
+    image: "/avatars/fox.png",
+  },
+  {
+    id: "ostrich",
+    name: "Ostrich",
+    image: "/avatars/ostrich.png",
+  },
+  {
+    id: "wolf",
+    name: "Wolf",
+    image: "/avatars/wolf.png",
   },
 ];

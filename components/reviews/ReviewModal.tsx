@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { X } from "lucide-react";
+import { X, Cake } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { AVATARS } from "@/lib/avatars";
 import { Avatar } from "@/components/avatars/Avatar";
@@ -15,6 +16,7 @@ export function ReviewModal({ open, onClose }: Props) {
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
   const [avatar, setAvatar] = useState("bear");
+  const [isBirthday, setIsBirthday] = useState(false);
   const [loading, setLoading] = useState(false);
 
   if (!open) return null;
@@ -36,6 +38,7 @@ export function ReviewModal({ open, onClose }: Props) {
           name,
           message,
           avatar,
+          isBirthday,
         }),
       });
 
@@ -188,6 +191,24 @@ export function ReviewModal({ open, onClose }: Props) {
             />
           </div>
 
+          {/* Birthday Celebration Checkbox */}
+          <div className="rounded-xl border border-[#e6d5cf] bg-white p-3.5 sm:rounded-2xl sm:p-4">
+            <label className="flex cursor-pointer items-center gap-3">
+              <input
+                type="checkbox"
+                checked={isBirthday}
+                onChange={(e) => setIsBirthday(e.target.checked)}
+                className="h-4 w-4 rounded border-[#e6d5cf] text-[#b95745] focus:ring-[#b95745]"
+              />
+              <div className="flex items-center gap-2">
+                <Cake size={18} className="text-[#b95745]" />
+                <span className="text-xs font-medium text-[#503322] sm:text-sm">
+                  I am celebrating my birthday! 🎂🎉
+                </span>
+              </div>
+            </label>
+          </div>
+
           {/* Avatar Picker */}
           <div>
             <label className="mb-2 block text-xs font-medium text-[#684535] sm:mb-3 sm:text-sm">
@@ -204,6 +225,7 @@ export function ReviewModal({ open, onClose }: Props) {
                     type="button"
                     onClick={() => setAvatar(item.id)}
                     className={`
+                      relative
                       flex
                       flex-col
                       items-center
@@ -222,12 +244,75 @@ export function ReviewModal({ open, onClose }: Props) {
                       }
                     `}
                   >
-                    <div className="flex h-12 w-12 items-center justify-center overflow-hidden sm:h-14 sm:w-14">
+                    <div className="relative flex h-12 w-12 items-center justify-center sm:h-14 sm:w-14">
+                      {/* Highlight Aura Glow */}
+                      {isBirthday && selected && (
+                        <motion.div
+                          className="absolute inset-[-4px] rounded-full bg-gradient-to-r from-pink-400/40 via-amber-300/40 to-rose-400/40 blur-sm"
+                          animate={{
+                            scale: [1, 1.1, 1],
+                            opacity: [0.6, 0.9, 0.6],
+                          }}
+                          transition={{
+                            duration: 1.8,
+                            repeat: Infinity,
+                            ease: "easeInOut",
+                          }}
+                        />
+                      )}
+
                       <Avatar
                         type={item.id}
                         size={52}
                         state={selected ? "selected" : "idle"}
                       />
+
+                      {/* Birthday Decorations */}
+                      <AnimatePresence>
+                        {isBirthday && selected && (
+                          <>
+                            {/* Party Hat SVG */}
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.5, y: 5 }}
+                              animate={{ opacity: 1, scale: 1, y: 0 }}
+                              exit={{ opacity: 0, scale: 0.5 }}
+                              className="absolute -top-3 left-1/2 -translate-x-1/2 pointer-events-none select-none z-20"
+                            >
+                              <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path d="M12 2L18 20H6L12 2Z" fill="#F43F5E" />
+                                <path d="M12 2L15 20H6L12 2Z" fill="#FBBF24" />
+                                <circle cx="12" cy="2" r="2.5" fill="#38BDF8" />
+                              </svg>
+                            </motion.div>
+
+                            {/* Floating Cake */}
+                            <motion.span
+                              initial={{ opacity: 0, scale: 0.5 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.5 }}
+                              className="absolute -bottom-1 -right-1 text-xs sm:text-sm select-none pointer-events-none z-20 drop-shadow-sm"
+                            >
+                              🎂
+                            </motion.span>
+
+                            {/* Floating Confetti Sparkles */}
+                            <motion.span
+                              initial={{ opacity: 0, y: 0 }}
+                              animate={{ opacity: [0, 1, 0], y: [-2, -12] }}
+                              transition={{ duration: 1.8, repeat: Infinity }}
+                              className="absolute -top-1 -right-1 text-[10px] select-none pointer-events-none z-20"
+                            >
+                              🎉
+                            </motion.span>
+                          </>
+                        )}
+                      </AnimatePresence>
                     </div>
 
                     <span className="mt-0.5 max-w-full truncate text-[9px] font-medium text-[#684535] sm:text-[10px]">

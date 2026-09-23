@@ -1,17 +1,28 @@
-import { desc } from "drizzle-orm";
+import { desc, gte, count } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { reviews } from "@/db/schema";
 
 import { ReviewWall } from "@/components/reviews/ReviewWall";
 import { AddReviewButton } from "@/components/reviews/AddReviewButton";
+import { HeaderBanner } from "@/components/HeaderBanner";
 
 export default async function HomePage() {
-  const reviewsData = await db
-    .select()
-    .from(reviews)
-    .orderBy(desc(reviews.createdAt))
-    .limit(10);
+  // Get midnight today (UTC)
+  const todayStart = new Date();
+  todayStart.setUTCHours(0, 0, 0, 0);
+
+  // Fetch latest reviews and calculate today's total count in parallel
+  const [reviewsData, [todayCountResult]] = await Promise.all([
+    db.select().from(reviews).orderBy(desc(reviews.createdAt)).limit(10),
+
+    db
+      .select({ value: count() })
+      .from(reviews)
+      .where(gte(reviews.createdAt, todayStart)),
+  ]);
+
+  const dailyCount = todayCountResult?.value ?? 0;
 
   return (
     <main className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-[#f2cfd5] text-[#503322]">
@@ -36,7 +47,9 @@ export default async function HomePage() {
         <AddReviewButton />
       </header>
 
-      {/* Replace the main section in app/page.tsx */}
+      <HeaderBanner />
+
+      {/* Main Review Wall section */}
       <section className="relative flex flex-1 w-full items-center justify-center overflow-y-auto md:overflow-hidden pt-4 pb-4 md:pt-10 md:pb-8">
         <ReviewWall reviews={reviewsData} />
       </section>

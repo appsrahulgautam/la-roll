@@ -38,6 +38,7 @@ export const reviews = pgTable("reviews", {
   name: varchar("name").notNull(),
   message: varchar("message").notNull(),
   avatar: varchar("avatar").notNull(),
+  isBirthday: boolean("is_birthday").notNull().default(false),
   likes: integer("likes").notNull().default(0),
   hearts: integer("hearts").notNull().default(0),
   createdAt: timestamp("created_at", {

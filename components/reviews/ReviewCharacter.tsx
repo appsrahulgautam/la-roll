@@ -11,6 +11,7 @@ type Review = {
   avatar: string;
   likes: number;
   hearts: number;
+  isBirthday?: boolean;
   createdAt: Date | string;
 };
 
@@ -29,8 +30,6 @@ export function ReviewCharacter({ review, latest = false, index }: Props) {
   const walkConfig = useMemo(() => {
     const direction = index % 2 === 0 ? "ltr" : "rtl";
     const duration = 50 + ((index * 5) % 25);
-
-    // Dynamic vertical lanes (4% to 22%) based on index to separate walking paths
     const bottomOffset = 4 + (index % 6) * 3.5;
 
     return { direction, duration, bottomOffset };
@@ -75,7 +74,6 @@ export function ReviewCharacter({ review, latest = false, index }: Props) {
       className="absolute flex flex-col items-center pointer-events-auto"
       style={{
         bottom: `${walkConfig.bottomOffset}%`,
-        // Dynamic base z-index ensures items lower on screen sit in front naturally
         zIndex: Math.floor(100 - walkConfig.bottomOffset),
       }}
       initial={{
@@ -94,20 +92,29 @@ export function ReviewCharacter({ review, latest = false, index }: Props) {
         times: [0, 0.05, 0.95, 1],
       }}
     >
-      {/* LATEST MESSAGE BADGE */}
-      {latest && (
-        <div className="relative z-50 mb-1 rounded-full bg-[#503322] px-2 py-0.5 text-[7px] font-bold tracking-[0.18em] text-amber-200 shadow-md sm:text-[8px]">
-          ✦ LATEST MESSAGE
-        </div>
-      )}
+      {/* BADGES */}
+      <div className="relative z-50 mb-1 flex flex-col items-center gap-0.5">
+        {latest && (
+          <div className="rounded-full bg-[#503322] px-2 py-0.5 text-[7px] font-bold tracking-[0.18em] text-amber-200 shadow-md sm:text-[8px]">
+            ✦ LATEST MESSAGE
+          </div>
+        )}
+        {review.isBirthday && (
+          <div className="rounded-full bg-gradient-to-r from-pink-500 via-rose-500 to-amber-500 px-2.5 py-0.5 text-[7px] font-extrabold tracking-wider text-white shadow-lg sm:text-[8px] animate-pulse">
+            🎂 BIRTHDAY CELEBRATION! 🎈
+          </div>
+        )}
+      </div>
 
-      {/* SPEECH BUBBLE - HIGH Z-INDEX (z-40) */}
+      {/* SPEECH BUBBLE */}
       <div className="relative z-40 mb-1.5 flex justify-center">
         <div
           className={`relative inline-block w-fit min-w-[120px] max-w-[180px] sm:max-w-[220px] rounded-[16px] border px-2.5 py-1.5 text-center shadow-md backdrop-blur-md transition-all ${
-            latest
-              ? "border-amber-400 bg-[#fffdfa]/95 ring-2 ring-amber-300/50 shadow-[0_4px_14px_rgba(217,119,6,0.15)]"
-              : "border-[#503322]/15 bg-[#fffaf5]/95 shadow-sm"
+            review.isBirthday
+              ? "border-pink-400 bg-[#fff0f4]/95 ring-2 ring-pink-400/50 shadow-[0_4px_16px_rgba(236,72,153,0.25)]"
+              : latest
+                ? "border-amber-400 bg-[#fffdfa]/95 ring-2 ring-amber-300/50 shadow-[0_4px_14px_rgba(217,119,6,0.15)]"
+                : "border-[#503322]/15 bg-[#fffaf5]/95 shadow-sm"
           }`}
         >
           <p className="line-clamp-2 break-words text-[10px] font-medium leading-tight text-[#503322] sm:text-xs">
@@ -138,11 +145,17 @@ export function ReviewCharacter({ review, latest = false, index }: Props) {
             </div>
           </div>
 
-          <div className="absolute -bottom-1 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rotate-45 border-b border-r border-[#503322]/15 bg-[#fffaf5]" />
+          <div
+            className={`absolute -bottom-1 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rotate-45 border-b border-r ${
+              review.isBirthday
+                ? "border-pink-400 bg-[#fff0f4]"
+                : "border-[#503322]/15 bg-[#fffaf5]"
+            }`}
+          />
         </div>
       </div>
 
-      {/* AVATAR - LOWER Z-INDEX (z-10) */}
+      {/* AVATAR + BIRTHDAY DECORATIONS */}
       <motion.div
         className="relative z-10 flex h-[80px] w-[80px] items-center justify-center sm:h-[90px] sm:w-[90px]"
         animate={{ y: [0, -4, 0] }}
@@ -151,15 +164,125 @@ export function ReviewCharacter({ review, latest = false, index }: Props) {
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        style={{ transform: isLTR ? "scaleX(1)" : "scaleX(-1)" }}
       >
-        <Avatar
-          type={review.avatar}
-          size={85}
-          state={latest ? "new" : "idle"}
-          reaction={reaction}
-        />
+        {/* HIGHLIGHT GLOW AURA FOR BIRTHDAY */}
+        {review.isBirthday && (
+          <motion.div
+            className="absolute inset-[-10px] rounded-full bg-gradient-to-r from-pink-400/40 via-amber-300/40 to-rose-400/40 blur-md -z-10"
+            animate={{ scale: [1, 1.15, 1], opacity: [0.6, 0.9, 0.6] }}
+            transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+          />
+        )}
 
+        {/* FLOATING CONFETTI PARTICLES */}
+        {review.isBirthday && (
+          <div className="absolute inset-0 pointer-events-none overflow-visible z-30">
+            <motion.span
+              className="absolute left-[-12px] top-[-5px] text-[12px]"
+              animate={{
+                y: [0, -25],
+                x: [-5, -15],
+                opacity: [0, 1, 0],
+                rotate: [0, 45],
+              }}
+              transition={{ duration: 2.2, repeat: Infinity, ease: "easeOut" }}
+            >
+              🎉
+            </motion.span>
+            <motion.span
+              className="absolute right-[-12px] top-[-8px] text-[12px]"
+              animate={{
+                y: [0, -28],
+                x: [5, 15],
+                opacity: [0, 1, 0],
+                rotate: [0, -45],
+              }}
+              transition={{
+                duration: 2.5,
+                repeat: Infinity,
+                ease: "easeOut",
+                delay: 0.4,
+              }}
+            >
+              ✨
+            </motion.span>
+            <motion.span
+              className="absolute left-[-8px] bottom-[10px] text-[10px]"
+              animate={{ y: [0, -20], x: [-8, 2], opacity: [0, 1, 0] }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeOut",
+                delay: 0.8,
+              }}
+            >
+              🎈
+            </motion.span>
+            <motion.span
+              className="absolute right-[-6px] bottom-[12px] text-[10px]"
+              animate={{ y: [0, -22], x: [8, -2], opacity: [0, 1, 0] }}
+              transition={{
+                duration: 2.1,
+                repeat: Infinity,
+                ease: "easeOut",
+                delay: 1.2,
+              }}
+            >
+              🎊
+            </motion.span>
+          </div>
+        )}
+
+        {/* PARTY HAT (SVG CUSTOM DESIGN) */}
+        {review.isBirthday && (
+          <motion.div
+            className="absolute -top-4 z-30 pointer-events-none"
+            animate={{ rotate: [-3, 3, -3] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M12 2L18 20H6L12 2Z" fill="#F43F5E" />
+              <path d="M12 2L15 20H6L12 2Z" fill="#FBBF24" />
+              <circle cx="12" cy="2" r="2.5" fill="#38BDF8" />
+            </svg>
+          </motion.div>
+        )}
+
+        {/* CAKE HELD IN HAND / SIDE */}
+        {review.isBirthday && (
+          <motion.div
+            className="absolute -bottom-1 -right-3 z-30 pointer-events-none text-lg sm:text-xl drop-shadow-md"
+            animate={{
+              y: [0, -3, 0],
+              rotate: [0, 5, 0],
+            }}
+            transition={{
+              duration: 1.2,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          >
+            🎂
+          </motion.div>
+        )}
+
+        {/* FLIPPED CHARACTER INNER CONTAINER */}
+        <div style={{ transform: isLTR ? "scaleX(1)" : "scaleX(-1)" }}>
+          <Avatar
+            type={review.avatar}
+            size={85}
+            state={latest ? "new" : "idle"}
+            reaction={reaction}
+          />
+        </div>
+
+        {/* REACTION FLOAT */}
         {reaction && (
           <motion.div
             initial={{ opacity: 0, y: 10, scale: 0.5 }}

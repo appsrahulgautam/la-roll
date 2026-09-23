@@ -1,18 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
-import { desc } from "drizzle-orm";
+import { desc, gte, count } from "drizzle-orm";
 import { reviews } from "@/db/schema";
 import { AVATARS } from "@/lib/avatars";
 import { db } from "@/lib/db";
 
 export async function GET() {
   try {
-    const latestReviews = await db
-      .select()
-      .from(reviews)
-      .orderBy(desc(reviews.createdAt))
-      .limit(7);
+    // Get midnight today (UTC)
+    const todayStart = new Date();
+    todayStart.setUTCHours(0, 0, 0, 0);
 
-    return NextResponse.json(latestReviews);
+    // Run review fetch and daily count in parallel
+    const [latestReviews, [todayCountResult]] = await Promise.all([
+      db.select().from(reviews).orderBy(desc(reviews.createdAt)).limit(7),
+
+      db
+        .select({ value: count() })
+        .from(reviews)
+        .where(gte(reviews.createdAt, todayStart)),
+    ]);
+
+    return NextResponse.json({
+      reviews: latestReviews,
+      dailyCount: todayCountResult?.value ?? 0,
+    });
   } catch (error) {
     console.error("GET /api/reviews", error);
 
@@ -34,6 +45,7 @@ export async function POST(request: NextRequest) {
     const name = String(body.name ?? "").trim();
     const message = String(body.message ?? "").trim();
     const avatar = String(body.avatar ?? "").trim();
+    const isBirthday = Boolean(body.isBirthday);
 
     if (!name) {
       return NextResponse.json(
@@ -71,6 +83,7 @@ export async function POST(request: NextRequest) {
         name: name.slice(0, 50),
         message,
         avatar,
+        isBirthday,
       })
       .returning();
 
