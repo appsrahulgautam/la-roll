@@ -77,6 +77,7 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
+    
 
     const [review] = await db
       .insert(reviews)
