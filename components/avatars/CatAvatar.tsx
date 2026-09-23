@@ -78,12 +78,12 @@ export function CatAvatar({
         {/* REACTION COOL CAT POPUP */}
         {reaction && (
           <motion.div
-            className="absolute -top-3 left-1/2 -translate-x-1/2 font-bold text-xs bg-slate-100 text-[#503322] px-2 py-0.5 rounded-full border border-slate-300 shadow-sm whitespace-nowrap"
+            className="absolute -top-1 left-1/2 -translate-x-1/2 font-bold text-xs bg-slate-100 text-[#503322] px-2 py-0.5 rounded-full border border-slate-300 shadow-sm whitespace-nowrap"
             initial={{ opacity: 0, scale: 0.5, y: 5 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.5 }}
           >
-            😼 Purrfect!
+            😼😼😼😼
           </motion.div>
         )}
       </motion.div>

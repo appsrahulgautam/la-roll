@@ -60,12 +60,12 @@ export function LlamaAvatar({
 
         {reaction && (
           <motion.div
-            className="absolute -top-3 left-1/2 -translate-x-1/2 font-bold text-xs bg-pink-100 text-[#503322] px-2 py-0.5 rounded-full border border-pink-300 shadow-sm whitespace-nowrap z-50"
+            className="absolute -top-1 left-1/2 -translate-x-1/2 font-bold text-xs bg-pink-100 text-[#503322] px-2 py-0.5 rounded-full border border-pink-300 shadow-sm whitespace-nowrap z-50"
             initial={{ opacity: 0, scale: 0.5, y: 5 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.5 }}
           >
-            🦙 No Llama Drama!
+            🦙🦙🦙🦙🦙
           </motion.div>
         )}
       </motion.div>

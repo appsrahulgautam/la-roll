@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Cake, Trees } from "lucide-react";
+import { X, Cake, Trees, PartyPopper } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { AVATARS } from "@/lib/avatars";
@@ -131,7 +131,7 @@ export function ReviewModal({ open, onClose }: Props) {
                 <div className="flex items-center gap-1.5">
                   <Cake size={16} className="text-[#b95745] shrink-0" />
                   <span className="text-xs font-medium text-[#503322]">
-                    Birthday 🎂
+                    Birthday 🎂🥳
                   </span>
                 </div>
               </label>
@@ -147,9 +147,9 @@ export function ReviewModal({ open, onClose }: Props) {
                   className="h-4 w-4 rounded border-[#e6d5cf] text-[#166534] focus:ring-[#166534]"
                 />
                 <div className="flex items-center gap-1.5">
-                  <Trees size={16} className="text-[#166534] shrink-0" />
+                  <PartyPopper size={16} className="text-[#ff9b04] shrink-0" />
                   <span className="text-xs font-medium text-[#503322]">
-                    Special Day 🎄
+                    Special Day ✨🎉💫
                   </span>
                 </div>
               </label>
