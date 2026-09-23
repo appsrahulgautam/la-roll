@@ -149,7 +149,7 @@ export function ReviewModal({ open, onClose }: Props) {
                 <div className="flex items-center gap-1.5">
                   <Trees size={16} className="text-[#166534] shrink-0" />
                   <span className="text-xs font-medium text-[#503322]">
-                    Christmas 🎄
+                    Special Day 🎄
                   </span>
                 </div>
               </label>
