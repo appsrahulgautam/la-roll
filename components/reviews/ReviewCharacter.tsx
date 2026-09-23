@@ -112,7 +112,7 @@ function ReviewCharacterComponent({ review, latest = false }: Props) {
         )}
         {review.isChristmas && (
           <div className="rounded-full bg-gradient-to-r from-emerald-600 via-red-600 to-amber-500 px-2.5 py-0.5 text-[7px] font-extrabold tracking-wider text-white shadow-lg sm:text-[8px] animate-pulse">
-            🎄 MERRY CHRISTMAS! 🎁
+            💫 SPECIAL DAY ✨🎉
           </div>
         )}
       </div>
