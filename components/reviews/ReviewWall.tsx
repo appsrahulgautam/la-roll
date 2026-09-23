@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, memo } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { ReviewCharacter } from "./ReviewCharacter";
 
@@ -24,33 +24,16 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+// Memoize individual review character so index shifts don't cause re-renders
+const MemoizedReviewCharacter = memo(ReviewCharacter);
+
 export function ReviewWall({ reviews: initialReviews, onNewReview }: Props) {
-  // Store review list in state initialized only once from initialProps
+  // Initialize state once and detach from prop updates
   const [reviewList, setReviewList] = useState<Review[]>(() => initialReviews);
-
-  // Keep a reference to prevent state reset race conditions
-  const initializedRef = useRef(false);
-
-  useEffect(() => {
-    // Only update if initialReviews changes during route transitions, NOT during routine re-renders
-    if (initializedRef.current && initialReviews.length > 0) {
-      setReviewList((prev) => {
-        // Merge without losing existing real-time additions
-        const existingIds = new Set(prev.map((r) => r.id));
-        const missingFromInitial = initialReviews.filter(
-          (r) => !existingIds.has(r.id),
-        );
-        return missingFromInitial.length > 0
-          ? [...missingFromInitial, ...prev]
-          : prev;
-      });
-    }
-    initializedRef.current = true;
-  }, [initialReviews]);
 
   useEffect(() => {
     const channel = supabase
-      .channel("realtime-reviews")
+      .channel("realtime-reviews-wall")
       .on(
         "postgres_changes",
         {
@@ -61,7 +44,6 @@ export function ReviewWall({ reviews: initialReviews, onNewReview }: Props) {
         (payload) => {
           const raw = payload.new as any;
 
-          // Normalize snake_case DB columns to camelCase
           const newReview: Review = {
             id: raw.id,
             name: raw.name,
@@ -74,11 +56,11 @@ export function ReviewWall({ reviews: initialReviews, onNewReview }: Props) {
           };
 
           setReviewList((prevReviews) => {
-            // Check if review already exists to avoid redundant re-renders
+            // Prevent duplicate entries
             if (prevReviews.some((r) => r.id === newReview.id)) {
               return prevReviews;
             }
-            // Prepend new review while maintaining existing instances
+            // Add new review at top without touching existing array references
             return [newReview, ...prevReviews];
           });
 
@@ -94,7 +76,7 @@ export function ReviewWall({ reviews: initialReviews, onNewReview }: Props) {
     };
   }, [onNewReview]);
 
-  // Keep maximum 6 active items on screen
+  // Keep a maximum of 6 active items on screen
   const activeReviews = reviewList.slice(0, 6);
 
   return (
@@ -110,8 +92,8 @@ export function ReviewWall({ reviews: initialReviews, onNewReview }: Props) {
         {/* ANIMATED WALKING CANVAS */}
         <div className="relative z-10 h-full w-full pointer-events-none">
           {activeReviews.map((review, index) => (
-            <ReviewCharacter
-              key={review.id} // Ensures React identifies avatars by ID, not array position
+            <MemoizedReviewCharacter
+              key={`review-avatar-${review.id}`} // Unique stable key per review
               review={review}
               latest={index === 0}
               index={index}

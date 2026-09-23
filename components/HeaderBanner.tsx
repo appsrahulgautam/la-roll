@@ -27,17 +27,27 @@ export function HeaderBanner({ initialCount = 0 }: Props) {
   const [quote, setQuote] = useState<string>("");
 
   useEffect(() => {
-    setDailyCount(initialCount);
-  }, [initialCount]);
-
-  useEffect(() => {
+    // 1. Set quote
     const randomQuote =
       MOTIVATIONAL_QUOTES[
         Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)
       ];
     setQuote(randomQuote);
 
-    // Real-time listener on HeaderBanner to increment message count
+    // 2. Fetch ground truth count directly on mount/refresh
+    async function fetchInitialCount() {
+      const { count, error } = await supabase
+        .from("reviews")
+        .select("*", { count: "exact", head: true });
+
+      if (!error && count !== null) {
+        setDailyCount(count);
+      }
+    }
+
+    fetchInitialCount();
+
+    // 3. Listen for real-time live inserts
     const channel = supabase
       .channel("header-count-sync")
       .on(
@@ -49,6 +59,7 @@ export function HeaderBanner({ initialCount = 0 }: Props) {
       )
       .subscribe();
 
+    // 4. Timer for Clock
     const updateDateTime = () => {
       const now = new Date();
       setTimeString(

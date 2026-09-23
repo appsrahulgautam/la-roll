@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState, useMemo } from "react";
+import { useState, useMemo, memo } from "react";
 import { Avatar } from "@/components/avatars/Avatar";
 
 type Review = {
@@ -21,19 +21,23 @@ type Props = {
   index: number;
 };
 
-export function ReviewCharacter({ review, latest = false, index }: Props) {
+function ReviewCharacterComponent({ review, latest = false, index }: Props) {
   const [likes, setLikes] = useState(review.likes);
   const [hearts, setHearts] = useState(review.hearts);
   const [loading, setLoading] = useState<"like" | "heart" | null>(null);
   const [reaction, setReaction] = useState<"like" | "heart" | null>(null);
 
+  // Derive walking traits from review.id so they NEVER change when array index shifts
   const walkConfig = useMemo(() => {
-    const direction = index % 2 === 0 ? "ltr" : "rtl";
-    const duration = 50 + ((index * 5) % 25);
-    const bottomOffset = 4 + (index % 6) * 3.5;
+    const idNum = typeof review.id === "number" ? review.id : 1;
 
-    return { direction, duration, bottomOffset };
-  }, [index]);
+    const direction = idNum % 2 === 0 ? "ltr" : "rtl";
+    const duration = 45 + (idNum % 20); // 45s - 65s range
+    const bottomOffset = 4 + (idNum % 6) * 3.5; // Stagger vertical positioning
+    const delay = (idNum % 5) * 1.5; // Staggered initial entrance delay
+
+    return { direction, duration, bottomOffset, delay };
+  }, [review.id]);
 
   const isLTR = walkConfig.direction === "ltr";
 
@@ -71,6 +75,7 @@ export function ReviewCharacter({ review, latest = false, index }: Props) {
 
   return (
     <motion.div
+      key={`avatar-motion-${review.id}`} // Ensures Framer Motion identifies element strictly by ID
       className="absolute flex flex-col items-center pointer-events-auto"
       style={{
         bottom: `${walkConfig.bottomOffset}%`,
@@ -88,7 +93,7 @@ export function ReviewCharacter({ review, latest = false, index }: Props) {
         duration: walkConfig.duration,
         repeat: Infinity,
         ease: "linear",
-        delay: index * 4,
+        delay: walkConfig.delay,
         times: [0, 0.05, 0.95, 1],
       }}
     >
@@ -297,3 +302,6 @@ export function ReviewCharacter({ review, latest = false, index }: Props) {
     </motion.div>
   );
 }
+
+// Wrap with React.memo to skip re-renders if props haven't changed
+export const ReviewCharacter = memo(ReviewCharacterComponent);
