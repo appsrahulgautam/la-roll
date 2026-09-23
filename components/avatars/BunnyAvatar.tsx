@@ -81,13 +81,14 @@ export function BunnyAvatar({
 
         {/* COFFEE CUP WAVE / BOUNCE ON REACTION */}
         {reaction && (
-          <motion.div
-            className="absolute -top-1 left-1/2 -translate-x-1/2 font-bold text-xs bg-amber-100 text-[#503322] px-2 py-0.5 rounded-full border border-amber-300 shadow-sm"
+           <motion.div
+            className="absolute -top-1 left-1/2 -translate-x-1/2 font-bold text-xs bg-slate-100 text-[#503322] px-2 py-0.5 rounded-full border border-slate-300 shadow-sm whitespace-nowrap"
             initial={{ opacity: 0, scale: 0.5, y: 5 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.5 }}
           >
             ☕☕☕☕☕☕
+
           </motion.div>
         )}
       </motion.div>
