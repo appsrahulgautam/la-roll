@@ -12,6 +12,7 @@ type Review = {
   likes: number;
   hearts: number;
   isBirthday?: boolean;
+  isChristmas?: boolean;
   createdAt: Date | string;
 };
 
@@ -21,7 +22,7 @@ type Props = {
   index: number;
 };
 
-function ReviewCharacterComponent({ review, latest = false, index }: Props) {
+function ReviewCharacterComponent({ review, latest = false }: Props) {
   const [likes, setLikes] = useState(review.likes);
   const [hearts, setHearts] = useState(review.hearts);
   const [loading, setLoading] = useState<"like" | "heart" | null>(null);
@@ -109,17 +110,24 @@ function ReviewCharacterComponent({ review, latest = false, index }: Props) {
             🎂 BIRTHDAY CELEBRATION! 🎈
           </div>
         )}
+        {review.isChristmas && (
+          <div className="rounded-full bg-gradient-to-r from-emerald-600 via-red-600 to-amber-500 px-2.5 py-0.5 text-[7px] font-extrabold tracking-wider text-white shadow-lg sm:text-[8px] animate-pulse">
+            🎄 MERRY CHRISTMAS! 🎁
+          </div>
+        )}
       </div>
 
       {/* SPEECH BUBBLE */}
       <div className="relative z-40 mb-1.5 flex justify-center">
         <div
           className={`relative inline-block w-fit min-w-[120px] max-w-[180px] sm:max-w-[220px] rounded-[16px] border px-2.5 py-1.5 text-center shadow-md backdrop-blur-md transition-all ${
-            review.isBirthday
-              ? "border-pink-400 bg-[#fff0f4]/95 ring-2 ring-pink-400/50 shadow-[0_4px_16px_rgba(236,72,153,0.25)]"
-              : latest
-                ? "border-amber-400 bg-[#fffdfa]/95 ring-2 ring-amber-300/50 shadow-[0_4px_14px_rgba(217,119,6,0.15)]"
-                : "border-[#503322]/15 bg-[#fffaf5]/95 shadow-sm"
+            review.isChristmas
+              ? "border-emerald-500 bg-[#f0fdf4]/95 ring-2 ring-emerald-500/50 shadow-[0_4px_16px_rgba(16,185,129,0.25)]"
+              : review.isBirthday
+                ? "border-pink-400 bg-[#fff0f4]/95 ring-2 ring-pink-400/50 shadow-[0_4px_16px_rgba(236,72,153,0.25)]"
+                : latest
+                  ? "border-amber-400 bg-[#fffdfa]/95 ring-2 ring-amber-300/50 shadow-[0_4px_14px_rgba(217,119,6,0.15)]"
+                  : "border-[#503322]/15 bg-[#fffaf5]/95 shadow-sm"
           }`}
         >
           <p className="line-clamp-2 break-words text-[10px] font-medium leading-tight text-[#503322] sm:text-xs">
@@ -152,15 +160,17 @@ function ReviewCharacterComponent({ review, latest = false, index }: Props) {
 
           <div
             className={`absolute -bottom-1 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rotate-45 border-b border-r ${
-              review.isBirthday
-                ? "border-pink-400 bg-[#fff0f4]"
-                : "border-[#503322]/15 bg-[#fffaf5]"
+              review.isChristmas
+                ? "border-emerald-500 bg-[#f0fdf4]"
+                : review.isBirthday
+                  ? "border-pink-400 bg-[#fff0f4]"
+                  : "border-[#503322]/15 bg-[#fffaf5]"
             }`}
           />
         </div>
       </div>
 
-      {/* AVATAR + BIRTHDAY DECORATIONS */}
+      {/* AVATAR + CELEBRATION DECORATIONS */}
       <motion.div
         className="relative z-10 flex h-[80px] w-[80px] items-center justify-center sm:h-[90px] sm:w-[90px]"
         animate={{ y: [0, -4, 0] }}
@@ -179,7 +189,16 @@ function ReviewCharacterComponent({ review, latest = false, index }: Props) {
           />
         )}
 
-        {/* FLOATING CONFETTI PARTICLES */}
+        {/* HIGHLIGHT GLOW AURA FOR CHRISTMAS */}
+        {review.isChristmas && (
+          <motion.div
+            className="absolute inset-[-10px] rounded-full bg-gradient-to-r from-emerald-500/40 via-red-500/40 to-amber-300/40 blur-md -z-10"
+            animate={{ scale: [1, 1.15, 1], opacity: [0.6, 0.9, 0.6] }}
+            transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+          />
+        )}
+
+        {/* FLOATING CONFETTI PARTICLES (BIRTHDAY) */}
         {review.isBirthday && (
           <div className="absolute inset-0 pointer-events-none overflow-visible z-30">
             <motion.span
@@ -238,7 +257,66 @@ function ReviewCharacterComponent({ review, latest = false, index }: Props) {
           </div>
         )}
 
-        {/* PARTY HAT (SVG CUSTOM DESIGN) */}
+        {/* FLOATING SNOW PARTICLES (CHRISTMAS) */}
+        {review.isChristmas && (
+          <div className="absolute inset-0 pointer-events-none overflow-visible z-30">
+            <motion.span
+              className="absolute left-[-10px] top-[-5px] text-[12px]"
+              animate={{
+                y: [0, -25],
+                x: [-5, -12],
+                opacity: [0, 1, 0],
+                rotate: [0, 180],
+              }}
+              transition={{ duration: 2.2, repeat: Infinity, ease: "easeOut" }}
+            >
+              ❄️
+            </motion.span>
+            <motion.span
+              className="absolute right-[-10px] top-[-8px] text-[12px]"
+              animate={{
+                y: [0, -28],
+                x: [5, 12],
+                opacity: [0, 1, 0],
+                rotate: [0, -180],
+              }}
+              transition={{
+                duration: 2.5,
+                repeat: Infinity,
+                ease: "easeOut",
+                delay: 0.4,
+              }}
+            >
+              ✨
+            </motion.span>
+            <motion.span
+              className="absolute left-[-6px] bottom-[10px] text-[10px]"
+              animate={{ y: [0, -20], x: [-6, 2], opacity: [0, 1, 0] }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeOut",
+                delay: 0.8,
+              }}
+            >
+              🎄
+            </motion.span>
+            <motion.span
+              className="absolute right-[-6px] bottom-[12px] text-[10px]"
+              animate={{ y: [0, -22], x: [6, -2], opacity: [0, 1, 0] }}
+              transition={{
+                duration: 2.1,
+                repeat: Infinity,
+                ease: "easeOut",
+                delay: 1.2,
+              }}
+            >
+              🔔
+            </motion.span>
+          </div>
+        )}
+
+        {/* PARTY HAT (BIRTHDAY SVG) */}
         {review.isBirthday && (
           <motion.div
             className="absolute -top-4 z-30 pointer-events-none"
@@ -259,7 +337,31 @@ function ReviewCharacterComponent({ review, latest = false, index }: Props) {
           </motion.div>
         )}
 
-        {/* CAKE HELD IN HAND / SIDE */}
+        {/* SANTA HAT (CHRISTMAS SVG) */}
+        {review.isChristmas && (
+          <motion.div
+            className="absolute -top-5 z-30 pointer-events-none"
+            animate={{ rotate: [-3, 3, -3] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M4 19C4 17 8 16 12 16C16 16 20 17 20 19V20H4V19Z"
+                fill="white"
+              />
+              <path d="M6 16L12 3L18 16H6Z" fill="#DC2626" />
+              <circle cx="12" cy="3" r="2.5" fill="white" />
+            </svg>
+          </motion.div>
+        )}
+
+        {/* CAKE HELD IN HAND / SIDE (BIRTHDAY) */}
         {review.isBirthday && (
           <motion.div
             className="absolute -bottom-1 -right-3 z-30 pointer-events-none text-lg sm:text-xl drop-shadow-md"
@@ -274,6 +376,24 @@ function ReviewCharacterComponent({ review, latest = false, index }: Props) {
             }}
           >
             🎂
+          </motion.div>
+        )}
+
+        {/* GIFT HELD IN HAND / SIDE (CHRISTMAS) */}
+        {review.isChristmas && (
+          <motion.div
+            className="absolute -bottom-1 -left-2 z-30 pointer-events-none text-lg sm:text-xl drop-shadow-md"
+            animate={{
+              y: [0, -3, 0],
+              rotate: [0, -5, 0],
+            }}
+            transition={{
+              duration: 1.2,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          >
+            🎁
           </motion.div>
         )}
 

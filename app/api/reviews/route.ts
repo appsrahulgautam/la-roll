@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
     const message = String(body.message ?? "").trim();
     const avatar = String(body.avatar ?? "").trim();
     const isBirthday = Boolean(body.isBirthday);
+    const isChristmas = Boolean(body.isChristmas);
 
     if (!name) {
       return NextResponse.json(
@@ -84,6 +85,7 @@ export async function POST(request: NextRequest) {
         message,
         avatar,
         isBirthday,
+        isChristmas: Boolean(isChristmas),
       })
       .returning();
 

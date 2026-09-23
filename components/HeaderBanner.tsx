@@ -27,14 +27,12 @@ export function HeaderBanner({ initialCount = 0 }: Props) {
   const [quote, setQuote] = useState<string>("");
 
   useEffect(() => {
-    // 1. Set quote
     const randomQuote =
       MOTIVATIONAL_QUOTES[
         Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)
       ];
     setQuote(randomQuote);
 
-    // 2. Fetch ground truth count directly on mount/refresh
     async function fetchInitialCount() {
       const { count, error } = await supabase
         .from("reviews")
@@ -47,7 +45,6 @@ export function HeaderBanner({ initialCount = 0 }: Props) {
 
     fetchInitialCount();
 
-    // 3. Listen for real-time live inserts
     const channel = supabase
       .channel("header-count-sync")
       .on(
@@ -59,7 +56,6 @@ export function HeaderBanner({ initialCount = 0 }: Props) {
       )
       .subscribe();
 
-    // 4. Timer for Clock
     const updateDateTime = () => {
       const now = new Date();
       setTimeString(
@@ -88,31 +84,44 @@ export function HeaderBanner({ initialCount = 0 }: Props) {
   }, []);
 
   return (
-    <div className="w-full bg-[#503322] text-[#fffaf5] px-4 py-2.5 shadow-md">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2 text-xs sm:text-sm">
-        {/* Motivational Quote */}
-        <div className="flex items-center gap-2 font-medium tracking-wide text-amber-200/90 text-center md:text-left">
-          <Sparkles size={15} className="text-amber-300 shrink-0" />
-          <span>{quote || "A little thought, a little character. ☕"}</span>
+    <div className="w-full bg-[#503322] text-[#fffaf5] px-4 py-2.5 landscape:py-1 landscape:px-3 shadow-md transition-all">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row landscape:flex-row items-center justify-between gap-2 landscape:gap-3 text-xs sm:text-sm">
+        {/* Motivational Quote (hidden on short landscape screens to save vertical space) */}
+        <div className="flex items-center gap-2 font-medium tracking-wide text-amber-200/90 text-center md:text-left landscape:text-left">
+          <Sparkles
+            size={14}
+            className="text-amber-300 shrink-0 landscape:w-3 landscape:h-3"
+          />
+          <span className="landscape:text-[11px] truncate max-w-[280px] sm:max-w-none">
+            {quote || "A little thought, a little character. ☕"}
+          </span>
         </div>
 
         {/* Counter and Clock */}
-        <div className="flex items-center gap-4 sm:gap-6 text-[11px] sm:text-xs">
+        <div className="flex items-center gap-4 sm:gap-6 landscape:gap-3 text-[11px] sm:text-xs">
           {/* Daily Message Counter */}
-          <div className="flex items-center gap-1.5 bg-[#69422d]/60 px-3 py-1 rounded-full border border-[#835339]/50">
-            <MessageSquareQuote size={14} className="text-pink-300" />
-            <span className="text-amber-100/80">Today&apos;s Messages:</span>
-            <span className="font-bold text-white bg-[#b95745] px-1.5 py-0.2 rounded-full transition-all duration-300">
+          <div className="flex items-center gap-1.5 bg-[#69422d]/60 px-3 py-1 landscape:py-0.5 landscape:px-2 rounded-full border border-[#835339]/50">
+            <MessageSquareQuote
+              size={13}
+              className="text-pink-300 landscape:w-3 landscape:h-3"
+            />
+            <span className="text-amber-100/80 landscape:text-[10px]">
+              Today&apos;s Messages:
+            </span>
+            <span className="font-bold text-white bg-[#b95745] px-1.5 py-0.2 rounded-full text-xs landscape:text-[10px]">
               {dailyCount}
             </span>
           </div>
 
           {/* Local Device Date & Time */}
-          <div className="flex items-center gap-1.5 font-mono text-amber-100/90 bg-[#69422d]/30 px-2.5 py-1 rounded-md">
-            <Clock size={13} className="text-amber-300" />
-            <span>{dateString}</span>
+          <div className="flex items-center gap-1.5 font-mono text-amber-100/90 bg-[#69422d]/30 px-2.5 py-1 landscape:py-0.5 landscape:px-2 rounded-md">
+            <Clock
+              size={12}
+              className="text-amber-300 landscape:w-3 landscape:h-3"
+            />
+            <span className="landscape:text-[10px]">{dateString}</span>
             <span className="opacity-40">|</span>
-            <span className="font-semibold text-white">
+            <span className="font-semibold text-white landscape:text-[10px]">
               {timeString || "--:--:--"}
             </span>
           </div>
