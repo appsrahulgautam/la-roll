@@ -27,8 +27,8 @@ export function HeaderBanner({ initialCount = 0 }: Props) {
 
   const [dateString, setDateString] = useState<string>("");
 
-  const [quote, setQuote] = useState<string>("");
-
+  const [quotes, setQuotes] = useState<string[]>([]);
+  const [quoteIndex, setQuoteIndex] = useState(0);
   // -----------------------------------------
   // GET TODAY'S DATE RANGE
   // -----------------------------------------
@@ -87,24 +87,20 @@ export function HeaderBanner({ initialCount = 0 }: Props) {
   // -----------------------------------------
   // LOAD MOTIVATIONAL QUOTE
   // -----------------------------------------
-  const fetchQuote = async () => {
+  const fetchQuotes = async () => {
     const { data, error } = await supabase
       .from("motivational_quotes")
-      .select("id, quote, created_at, updated_at")
+      .select("quote")
       .order("created_at", {
         ascending: false,
-      })
-      .limit(1)
-      .maybeSingle();
+      });
 
     if (error) {
-      console.error("Failed to load motivational quote:", error);
+      console.error("Failed to load motivational quotes:", error);
       return;
     }
 
-    if (data?.quote) {
-      setQuote(data.quote);
-    }
+    setQuotes((data ?? []).map((item) => item.quote));
   };
 
   // -----------------------------------------
@@ -112,7 +108,7 @@ export function HeaderBanner({ initialCount = 0 }: Props) {
   // -----------------------------------------
   useEffect(() => {
     fetchDailyCount();
-    fetchQuote();
+    fetchQuotes();
 
     // -----------------------------------------
     // REVIEWS REALTIME
@@ -146,6 +142,15 @@ export function HeaderBanner({ initialCount = 0 }: Props) {
           // belongs to today
           if (createdTime >= startTime && createdTime < endTime) {
             setDailyCount((prev) => prev + 1);
+            setQuotes((currentQuotes) => {
+              if (currentQuotes.length === 0) {
+                return currentQuotes;
+              }
+              setQuoteIndex((currentIndex) => {
+                return (currentIndex + 1) % currentQuotes.length;
+              });
+              return currentQuotes;
+            });
           }
         },
       )
@@ -168,7 +173,7 @@ export function HeaderBanner({ initialCount = 0 }: Props) {
           table: "motivational_quotes",
         },
         () => {
-          fetchQuote();
+          fetchQuotes();
         },
       )
 
@@ -181,7 +186,7 @@ export function HeaderBanner({ initialCount = 0 }: Props) {
           table: "motivational_quotes",
         },
         () => {
-          fetchQuote();
+          fetchQuotes();
         },
       )
 
@@ -194,7 +199,7 @@ export function HeaderBanner({ initialCount = 0 }: Props) {
           table: "motivational_quotes",
         },
         () => {
-          fetchQuote();
+          fetchQuotes();
         },
       )
 
@@ -266,7 +271,9 @@ export function HeaderBanner({ initialCount = 0 }: Props) {
           />
 
           <span className="max-w-[280px] truncate landscape:text-[11px] sm:max-w-none">
-            {quote || "A little thought, a little character. ☕"}
+            {quotes.length > 0
+              ? quotes[quoteIndex]
+              : "A little thought, a little character. ☕"}
           </span>
         </div>
 
