@@ -4,60 +4,210 @@ import { useState, useEffect } from "react";
 import { Clock, MessageSquareQuote, Sparkles } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
 
-const MOTIVATIONAL_QUOTES = [
-  "A little thought, a little character. ☕",
-  "Small steps lead to sweet memories. ✨",
-  "Warm coffee, warm hearts, warm stories.",
-  "Spread joy, one message at a time. 🥐",
-  "Every review brings a smile to the wall. 🌟",
-];
-
 type Props = {
   initialCount?: number;
 };
 
+type Quote = {
+  id: string;
+  quote: string;
+  created_at: string;
+  updated_at: string;
+};
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export function HeaderBanner({ initialCount = 0 }: Props) {
   const [dailyCount, setDailyCount] = useState<number>(initialCount);
+
   const [timeString, setTimeString] = useState<string>("");
+
   const [dateString, setDateString] = useState<string>("");
+
   const [quote, setQuote] = useState<string>("");
 
-  useEffect(() => {
-    const randomQuote =
-      MOTIVATIONAL_QUOTES[
-        Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)
-      ];
-    setQuote(randomQuote);
+  // -----------------------------------------
+  // GET TODAY'S DATE RANGE
+  // -----------------------------------------
+  const getTodayRange = () => {
+    const now = new Date();
 
-    async function fetchInitialCount() {
-      const { count, error } = await supabase
-        .from("reviews")
-        .select("*", { count: "exact", head: true });
+    const startOfDay = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      0,
+      0,
+      0,
+      0,
+    );
 
-      if (!error && count !== null) {
-        setDailyCount(count);
-      }
+    const startOfTomorrow = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 1,
+      0,
+      0,
+      0,
+      0,
+    );
+
+    return {
+      start: startOfDay.toISOString(),
+      end: startOfTomorrow.toISOString(),
+    };
+  };
+
+  // -----------------------------------------
+  // LOAD TODAY'S REVIEW COUNT
+  // -----------------------------------------
+  const fetchDailyCount = async () => {
+    const { start, end } = getTodayRange();
+
+    const { count, error } = await supabase
+      .from("reviews")
+      .select("*", {
+        count: "exact",
+        head: true,
+      })
+      .gte("created_at", start)
+      .lt("created_at", end);
+
+    if (error) {
+      console.error("Failed to load today's review count:", error);
+      return;
     }
 
-    fetchInitialCount();
+    setDailyCount(count ?? 0);
+  };
 
-    const channel = supabase
-      .channel("header-count-sync")
+  // -----------------------------------------
+  // LOAD MOTIVATIONAL QUOTE
+  // -----------------------------------------
+  const fetchQuote = async () => {
+    const { data, error } = await supabase
+      .from("motivational_quotes")
+      .select("id, quote, created_at, updated_at")
+      .order("created_at", {
+        ascending: false,
+      })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Failed to load motivational quote:", error);
+      return;
+    }
+
+    if (data?.quote) {
+      setQuote(data.quote);
+    }
+  };
+
+  // -----------------------------------------
+  // INITIAL LOAD + REALTIME
+  // -----------------------------------------
+  useEffect(() => {
+    fetchDailyCount();
+    fetchQuote();
+
+    // -----------------------------------------
+    // REVIEWS REALTIME
+    // -----------------------------------------
+    const reviewsChannel = supabase
+      .channel("header-reviews-sync")
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "reviews" },
-        () => {
-          setDailyCount((prev) => prev + 1);
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "reviews",
+        },
+        (payload) => {
+          const createdAt = (payload.new as any)?.created_at;
+
+          if (!createdAt) {
+            fetchDailyCount();
+            return;
+          }
+
+          const { start, end } = getTodayRange();
+
+          const createdTime = new Date(createdAt).getTime();
+
+          const startTime = new Date(start).getTime();
+
+          const endTime = new Date(end).getTime();
+
+          // Only increment if the new review
+          // belongs to today
+          if (createdTime >= startTime && createdTime < endTime) {
+            setDailyCount((prev) => prev + 1);
+          }
         },
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log("Header reviews realtime:", status);
+      });
 
+    // -----------------------------------------
+    // MOTIVATIONAL QUOTES REALTIME
+    // -----------------------------------------
+    const quotesChannel = supabase
+      .channel("header-quotes-sync")
+
+      // New quote added
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "motivational_quotes",
+        },
+        () => {
+          fetchQuote();
+        },
+      )
+
+      // Existing quote edited
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "motivational_quotes",
+        },
+        () => {
+          fetchQuote();
+        },
+      )
+
+      // Quote deleted
+      .on(
+        "postgres_changes",
+        {
+          event: "DELETE",
+          schema: "public",
+          table: "motivational_quotes",
+        },
+        () => {
+          fetchQuote();
+        },
+      )
+
+      .subscribe((status) => {
+        console.log("Header quotes realtime:", status);
+      });
+
+    // -----------------------------------------
+    // CLOCK
+    // -----------------------------------------
     const updateDateTime = () => {
       const now = new Date();
+
       setTimeString(
         now.toLocaleTimeString([], {
           hour: "2-digit",
@@ -65,6 +215,7 @@ export function HeaderBanner({ initialCount = 0 }: Props) {
           second: "2-digit",
         }),
       );
+
       setDateString(
         now.toLocaleDateString([], {
           weekday: "short",
@@ -75,52 +226,83 @@ export function HeaderBanner({ initialCount = 0 }: Props) {
     };
 
     updateDateTime();
+
     const timer = setInterval(updateDateTime, 1000);
 
+    // -----------------------------------------
+    // MIDNIGHT RESET
+    // -----------------------------------------
+    const midnightTimer = setInterval(() => {
+      const now = new Date();
+
+      if (now.getHours() === 0 && now.getMinutes() === 0) {
+        fetchDailyCount();
+      }
+    }, 60 * 1000);
+
+    // -----------------------------------------
+    // CLEANUP
+    // -----------------------------------------
     return () => {
       clearInterval(timer);
-      supabase.removeChannel(channel);
+      clearInterval(midnightTimer);
+
+      supabase.removeChannel(reviewsChannel);
+
+      supabase.removeChannel(quotesChannel);
     };
   }, []);
 
   return (
-    <div className="w-full bg-[#503322] text-[#fffaf5] px-4 py-2.5 landscape:py-1 landscape:px-3 shadow-md transition-all">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row landscape:flex-row items-center justify-between gap-2 landscape:gap-3 text-xs sm:text-sm">
-        {/* Motivational Quote (hidden on short landscape screens to save vertical space) */}
-        <div className="flex items-center gap-2 font-medium tracking-wide text-amber-200/90 text-center md:text-left landscape:text-left">
+    <div className="w-full bg-[#503322] px-4 py-2.5 text-[#fffaf5] shadow-md transition-all landscape:px-3 landscape:py-1">
+      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 text-xs sm:text-sm md:flex-row landscape:flex-row landscape:gap-3">
+        {/* ----------------------------------------- */}
+        {/* MOTIVATIONAL QUOTE */}
+        {/* ----------------------------------------- */}
+        <div className="flex items-center gap-2 text-center font-medium tracking-wide text-amber-200/90 md:text-left landscape:text-left">
           <Sparkles
             size={14}
-            className="text-amber-300 shrink-0 landscape:w-3 landscape:h-3"
+            className="shrink-0 text-amber-300 landscape:h-3 landscape:w-3"
           />
-          <span className="landscape:text-[11px] truncate max-w-[280px] sm:max-w-none">
+
+          <span className="max-w-[280px] truncate landscape:text-[11px] sm:max-w-none">
             {quote || "A little thought, a little character. ☕"}
           </span>
         </div>
 
-        {/* Counter and Clock */}
-        <div className="flex items-center gap-4 sm:gap-6 landscape:gap-3 text-[11px] sm:text-xs">
-          {/* Daily Message Counter */}
-          <div className="flex items-center gap-1.5 bg-[#69422d]/60 px-3 py-1 landscape:py-0.5 landscape:px-2 rounded-full border border-[#835339]/50">
+        {/* ----------------------------------------- */}
+        {/* COUNTER + CLOCK */}
+        {/* ----------------------------------------- */}
+        <div className="flex items-center gap-4 text-[11px] sm:gap-6 sm:text-xs landscape:gap-3">
+          {/* TODAY'S MESSAGE COUNTER */}
+          <div className="flex items-center gap-1.5 rounded-full border border-[#835339]/50 bg-[#69422d]/60 px-3 py-1 landscape:px-2 landscape:py-0.5">
             <MessageSquareQuote
               size={13}
-              className="text-pink-300 landscape:w-3 landscape:h-3"
+              className="text-pink-300 landscape:h-3 landscape:w-3"
             />
+
             <span className="text-amber-100/80 landscape:text-[10px]">
               Today&apos;s Messages:
             </span>
-            <span className="font-bold text-white bg-[#b95745] px-1.5 py-0.2 rounded-full text-xs landscape:text-[10px]">
+
+            <span className="rounded-full bg-[#b95745] px-1.5 py-0.2 text-xs font-bold text-white landscape:text-[10px]">
               {dailyCount}
             </span>
           </div>
 
-          {/* Local Device Date & Time */}
-          <div className="flex items-center gap-1.5 font-mono text-amber-100/90 bg-[#69422d]/30 px-2.5 py-1 landscape:py-0.5 landscape:px-2 rounded-md">
+          {/* ----------------------------------------- */}
+          {/* LOCAL DATE & TIME */}
+          {/* ----------------------------------------- */}
+          <div className="flex items-center gap-1.5 rounded-md bg-[#69422d]/30 px-2.5 py-1 font-mono text-amber-100/90 landscape:px-2 landscape:py-0.5">
             <Clock
               size={12}
-              className="text-amber-300 landscape:w-3 landscape:h-3"
+              className="text-amber-300 landscape:h-3 landscape:w-3"
             />
+
             <span className="landscape:text-[10px]">{dateString}</span>
+
             <span className="opacity-40">|</span>
+
             <span className="font-semibold text-white landscape:text-[10px]">
               {timeString || "--:--:--"}
             </span>

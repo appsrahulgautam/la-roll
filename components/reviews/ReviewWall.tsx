@@ -35,10 +35,18 @@ export function ReviewWall({
 }: Props) {
   // Initialize state once and detach from prop updates
   const [reviewList, setReviewList] = useState<Review[]>(() => initialReviews);
+  const [wallpaperUrl, setWallpaperUrl] = useState<string | null>(null);
 
+  // -----------------------------------------
+  // REVIEWS REALTIME
+  // -----------------------------------------
   useEffect(() => {
     const channel = supabase
       .channel("realtime-reviews-wall")
+
+      // -----------------------------------------
+      // NEW REVIEW
+      // -----------------------------------------
       .on(
         "postgres_changes",
         {
@@ -62,24 +70,131 @@ export function ReviewWall({
 
           setReviewList((prevReviews) => {
             // Prevent duplicate entries
-            if (prevReviews.some((r) => r.id === newReview.id)) {
+            if (prevReviews.some((review) => review.id === newReview.id)) {
               return prevReviews;
             }
-            // Add new review at top without touching existing array references
+
+            // Newest review goes first
             return [newReview, ...prevReviews];
           });
 
-          if (onNewReview) {
-            onNewReview();
-          }
+          onNewReview?.();
         },
       )
-      .subscribe();
+
+      // -----------------------------------------
+      // REVIEW DELETED
+      // -----------------------------------------
+      .on(
+        "postgres_changes",
+        {
+          event: "DELETE",
+          schema: "public",
+          table: "reviews",
+        },
+        (payload) => {
+          const deletedId = Number((payload.old as any).id);
+
+          setReviewList((prevReviews) =>
+            prevReviews.filter((review) => review.id !== deletedId),
+          );
+        },
+      )
+
+      // -----------------------------------------
+      // REVIEW UPDATED
+      // -----------------------------------------
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "reviews",
+        },
+        (payload) => {
+          const raw = payload.new as any;
+
+          setReviewList((prevReviews) =>
+            prevReviews.map((review) =>
+              review.id === raw.id
+                ? {
+                    ...review,
+                    name: raw.name,
+                    message: raw.message,
+                    avatar: raw.avatar,
+                    likes: raw.likes ?? 0,
+                    hearts: raw.hearts ?? 0,
+                    isBirthday: raw.is_birthday ?? raw.isBirthday ?? false,
+                    createdAt: raw.created_at ?? raw.createdAt,
+                  }
+                : review,
+            ),
+          );
+        },
+      )
+
+      .subscribe((status) => {
+        console.log("Reviews realtime status:", status);
+      });
 
     return () => {
       supabase.removeChannel(channel);
     };
   }, [onNewReview]);
+
+  // -----------------------------------------
+  // WALLPAPER: LOAD CURRENT WALLPAPER
+  // + REALTIME UPDATES
+  // -----------------------------------------
+  useEffect(() => {
+    const loadWallpaper = async () => {
+      const { data, error } = await supabase
+        .from("wallpaper")
+        .select("wallpaper_url")
+        .limit(1)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Failed to load wallpaper:", error);
+        return;
+      }
+
+      if (data?.wallpaper_url) {
+        setWallpaperUrl(data.wallpaper_url);
+      }
+    };
+
+    loadWallpaper();
+
+    const wallpaperChannel = supabase
+      .channel("realtime-wallpaper")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "wallpaper",
+        },
+        (payload) => {
+          console.log("Wallpaper updated:", payload);
+
+          const wallpaper = payload.new as {
+            wallpaper_url?: string;
+          };
+
+          if (wallpaper.wallpaper_url) {
+            setWallpaperUrl(wallpaper.wallpaper_url);
+          }
+        },
+      )
+      .subscribe((status) => {
+        console.log("Wallpaper realtime status:", status);
+      });
+
+    return () => {
+      supabase.removeChannel(wallpaperChannel);
+    };
+  }, []);
 
   // Keep a maximum of 6 active items on screen
   const activeReviews = reviewList.slice(0, 6);
@@ -108,7 +223,9 @@ export function ReviewWall({
         {/* COURTYARD SHOP BACKGROUND IMAGE */}
         <div
           className="absolute inset-0 pointer-events-none bg-cover bg-bottom bg-no-repeat"
-          style={{ backgroundImage: "url('/background.png')" }}
+          style={{
+            backgroundImage: `url("${wallpaperUrl || "/background.png"}")`,
+          }}
         />
 
         {/* ANIMATED WALKING CANVAS */}

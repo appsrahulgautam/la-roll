@@ -156,22 +156,22 @@ export default function AdminLayout({
               label="Dashboard"
               onClick={closeSidebar}
             />
-            <AdminNavItem
-              href="/admin/events/create"
-              icon={MapPlus}
-              label="Create Event"
-              onClick={closeSidebar}
-            />
-            <AdminNavItem
-              href="/admin/events/manage"
-              icon={LandPlot}
-              label="Manage Events"
-              onClick={closeSidebar}
-            />
-            <AdminNavItem
+              <AdminNavItem
               href="/admin/reviews"
               icon={UserCheck}
               label="Reviews"
+              onClick={closeSidebar}
+            />
+            <AdminNavItem
+              href="/admin/motivational-quotes"
+              icon={MapPlus}
+              label="Motivational Quotes"
+              onClick={closeSidebar}
+            />
+            <AdminNavItem
+              href="/admin/wallpaper"
+              icon={LandPlot}
+              label="Manage Wallpaper"
               onClick={closeSidebar}
             />
             <AdminNavItem
