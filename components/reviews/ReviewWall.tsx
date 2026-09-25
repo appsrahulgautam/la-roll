@@ -36,7 +36,7 @@ export function ReviewWall({
   // Initialize state once and detach from prop updates
   const [reviewList, setReviewList] = useState<Review[]>(() => initialReviews);
   const [wallpaperUrl, setWallpaperUrl] = useState<string | null>(null);
-
+  const [newReviewId, setNewReviewId] = useState<number | null>(null);
   // -----------------------------------------
   // REVIEWS REALTIME
   // -----------------------------------------
@@ -69,13 +69,12 @@ export function ReviewWall({
           };
 
           setReviewList((prevReviews) => {
-            // Prevent duplicate entries
             if (prevReviews.some((review) => review.id === newReview.id)) {
               return prevReviews;
             }
 
-            // Newest review goes first
-            return [newReview, ...prevReviews];
+
+            return [newReview, ...prevReviews].slice(0, 6);
           });
 
           onNewReview?.();
@@ -197,7 +196,7 @@ export function ReviewWall({
   }, []);
 
   // Keep a maximum of 6 active items on screen
-  const activeReviews = reviewList.slice(0, 6);
+  const activeReviews = reviewList.slice(0, 7);
 
   return (
     <div className="relative h-full w-full p-0 md:px-8 md:pb-8">
@@ -222,7 +221,7 @@ export function ReviewWall({
 
         {/* COURTYARD SHOP BACKGROUND IMAGE */}
         <div
-          className="absolute inset-0 pointer-events-none bg-cover bg-bottom bg-no-repeat"
+          className="absolute inset-0 pointer-events-none bg-[#F3CED5] bg-cover bg-bottom bg-no-repeat"
           style={{
             backgroundImage: `url("${wallpaperUrl || "/background.png"}")`,
           }}
@@ -232,10 +231,11 @@ export function ReviewWall({
         <div className="relative z-10 h-full w-full pointer-events-none">
           {activeReviews.map((review, index) => (
             <MemoizedReviewCharacter
-              key={`review-avatar-${review.id}`} // Unique stable key per review
+              key={`review-avatar-${review.id}`}
               review={review}
               latest={index === 0}
               index={index}
+              newReview={review.id === newReviewId}
             />
           ))}
         </div>

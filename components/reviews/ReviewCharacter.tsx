@@ -20,9 +20,13 @@ type Props = {
   review: Review;
   latest?: boolean;
   index: number;
+  newReview?: boolean;
 };
-
-function ReviewCharacterComponent({ review, latest = false }: Props) {
+function ReviewCharacterComponent({
+  review,
+  latest = false,
+  newReview = false,
+}: Props) {
   const [likes, setLikes] = useState(review.likes);
   const [hearts, setHearts] = useState(review.hearts);
   const [loading, setLoading] = useState<"like" | "heart" | null>(null);
@@ -35,7 +39,7 @@ function ReviewCharacterComponent({ review, latest = false }: Props) {
     const direction = idNum % 2 === 0 ? "ltr" : "rtl";
     const duration = 45 + (idNum % 20); // 45s - 65s range
     const bottomOffset = 4 + (idNum % 6) * 3.5; // Stagger vertical positioning
-    const delay = (idNum % 5) * 1.5; // Staggered initial entrance delay
+    const delay = 0 ;//(idNum % 5) * 1.5;
 
     return { direction, duration, bottomOffset, delay };
   }, [review.id]);
@@ -83,8 +87,8 @@ function ReviewCharacterComponent({ review, latest = false }: Props) {
         zIndex: Math.floor(100 - walkConfig.bottomOffset),
       }}
       initial={{
-        x: isLTR ? "-30vw" : "130vw",
-        opacity: 0,
+        x: newReview ? "0vw" : isLTR ? "-30vw" : "130vw",
+        opacity: newReview ? 1 : 0,
       }}
       animate={{
         x: isLTR ? ["-30vw", "130vw"] : ["130vw", "-30vw"],
@@ -94,7 +98,7 @@ function ReviewCharacterComponent({ review, latest = false }: Props) {
         duration: walkConfig.duration,
         repeat: Infinity,
         ease: "linear",
-        delay: walkConfig.delay,
+        delay: newReview ? 0 : walkConfig.delay,
         times: [0, 0.05, 0.95, 1],
       }}
     >
