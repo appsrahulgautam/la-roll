@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Cake,
   Heart,
@@ -103,6 +103,8 @@ function getPaginationItems(
 
 export default function AdminReviewsPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
+  const topScrollRef = useRef<HTMLDivElement>(null);
+  const tableScrollRef = useRef<HTMLDivElement>(null);
 
   const [pagination, setPagination] = useState<Pagination>({
     currentPage: 1,
@@ -115,6 +117,27 @@ export default function AdminReviewsPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const syncScroll = (
+    source: HTMLDivElement,
+    target: HTMLDivElement | null,
+  ) => {
+    if (target && target.scrollLeft !== source.scrollLeft) {
+      target.scrollLeft = source.scrollLeft;
+    }
+  };
+
+  const syncTopScroll = () => {
+    if (topScrollRef.current && tableScrollRef.current) {
+      topScrollRef.current.scrollLeft = tableScrollRef.current.scrollLeft;
+    }
+  };
+
+  const syncTableScroll = () => {
+    if (topScrollRef.current && tableScrollRef.current) {
+      tableScrollRef.current.scrollLeft = topScrollRef.current.scrollLeft;
+    }
+  };
 
   const loadReviews = useCallback(async (page: number) => {
     try {
@@ -357,121 +380,139 @@ export default function AdminReviewsPage() {
         {!loading && !error && reviews.length > 0 && (
           <>
             <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white">
-              {/* Table Header */}
-              <div className="hidden border-b border-zinc-200 bg-zinc-50 px-6 py-3 md:grid md:grid-cols-[minmax(220px,1fr)_minmax(300px,2fr)_140px_120px_100px] md:items-center md:gap-6">
-                <div className="text-xs font-semibold uppercase tracking-[0.1em] text-zinc-500">
-                  Customer
-                </div>
-
-                <div className="text-xs font-semibold uppercase tracking-[0.1em] text-zinc-500">
-                  Review
-                </div>
-
-                <div className="text-xs font-semibold uppercase tracking-[0.1em] text-zinc-500">
-                  Engagement
-                </div>
-
-                <div className="text-xs font-semibold uppercase tracking-[0.1em] text-zinc-500">
-                  Date
-                </div>
-
-                <div className="text-right text-xs font-semibold uppercase tracking-[0.1em] text-zinc-500">
-                  Action
-                </div>
+              {/* Persistent horizontal scrollbar */}
+              <div
+                ref={topScrollRef}
+                onScroll={syncTableScroll}
+                className="sticky top-0 z-20 overflow-x-auto overflow-y-hidden border-b border-zinc-200 bg-white"
+              >
+                <div className="h-4 min-w-[1000px]" />
               </div>
 
-              <div className="divide-y divide-zinc-200">
-                {reviews.map((review) => (
-                  <div
-                    key={review.id}
-                    className="px-5 py-5 transition hover:bg-zinc-50 md:px-6"
-                  >
-                    <div className="grid grid-cols-1 gap-5 md:grid-cols-[minmax(220px,1fr)_minmax(300px,2fr)_140px_120px_100px] md:items-center md:gap-6">
-                      {/* Customer */}
-                      <div className="flex items-center gap-3">
-                        <Avatar avatar={review.avatar} name={review.name} />
+              {/* Table */}
+              <div
+                ref={tableScrollRef}
+                onScroll={syncTopScroll}
+                className="overflow-x-auto"
+              >
+                <div className="min-w-[900px]">
+                  {/* Table Header */}
+                  <div className="hidden border-b border-zinc-200 bg-zinc-50 px-6 py-3 md:grid md:grid-cols-[minmax(220px,1fr)_minmax(300px,2fr)_140px_120px_100px] md:items-center md:gap-6">
+                    <div className="text-xs font-semibold uppercase tracking-[0.1em] text-zinc-500">
+                      Customer
+                    </div>
 
-                        <div className="min-w-0">
-                          <p className="truncate font-semibold text-zinc-950">
-                            {review.name}
-                          </p>
+                    <div className="text-xs font-semibold uppercase tracking-[0.1em] text-zinc-500">
+                      Review
+                    </div>
 
-                          <p className="mt-0.5 text-xs text-zinc-400">
-                            Review #{review.id}
-                          </p>
+                    <div className="text-xs font-semibold uppercase tracking-[0.1em] text-zinc-500">
+                      Engagement
+                    </div>
 
-                          {(review.isBirthday || review.isChristmas) && (
-                            <div className="mt-2 flex flex-wrap gap-1.5">
-                              {review.isBirthday && (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-pink-50 px-2 py-1 text-[11px] font-medium text-pink-700">
-                                  <Cake className="h-3 w-3" />
-                                  Birthday
-                                </span>
-                              )}
+                    <div className="text-xs font-semibold uppercase tracking-[0.1em] text-zinc-500">
+                      Date
+                    </div>
 
-                              {review.isChristmas && (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-1 text-[11px] font-medium text-green-700">
-                                  <TreePine className="h-3 w-3" />
-                                  Christmas
-                                </span>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Review */}
-                      <div>
-                        <p className="text-sm leading-6 text-zinc-700">
-                          {review.message}
-                        </p>
-                      </div>
-
-                      {/* Engagement */}
-                      <div className="flex gap-4 md:block">
-                        <div className="flex items-center gap-1.5 text-sm text-zinc-500">
-                          <ThumbsUp className="h-4 w-4" />
-
-                          <span className="tabular-nums">
-                            {review.likes.toLocaleString()}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-1.5 text-sm text-zinc-500 md:mt-2">
-                          <Heart className="h-4 w-4" />
-
-                          <span className="tabular-nums">
-                            {review.hearts.toLocaleString()}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Date */}
-                      <div>
-                        <p className="text-sm text-zinc-700">
-                          {formatDate(review.createdAt)}
-                        </p>
-                      </div>
-
-                      {/* Delete */}
-                      <div className="flex md:justify-end">
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(review)}
-                          disabled={deletingId === review.id}
-                          className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          {deletingId === review.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Trash2 className="h-4 w-4" />
-                          )}
-                          Delete
-                        </button>
-                      </div>
+                    <div className="text-right text-xs font-semibold uppercase tracking-[0.1em] text-zinc-500">
+                      Action
                     </div>
                   </div>
-                ))}
+
+                  <div className="divide-y divide-zinc-200">
+                    {reviews.map((review) => (
+                      <div
+                        key={review.id}
+                        className="px-5 py-5 transition hover:bg-zinc-50 md:px-6"
+                      >
+                        <div className="grid grid-cols-1 gap-5 md:grid-cols-[minmax(220px,1fr)_minmax(300px,2fr)_140px_120px_100px] md:items-center md:gap-6">
+                          {/* Customer */}
+                          <div className="flex items-center gap-3">
+                            <Avatar avatar={review.avatar} name={review.name} />
+
+                            <div className="min-w-0">
+                              <p className="truncate font-semibold text-zinc-950">
+                                {review.name}
+                              </p>
+
+                              <p className="mt-0.5 text-xs text-zinc-400">
+                                Review #{review.id}
+                              </p>
+
+                              {(review.isBirthday || review.isChristmas) && (
+                                <div className="mt-2 flex flex-wrap gap-1.5">
+                                  {review.isBirthday && (
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-pink-50 px-2 py-1 text-[11px] font-medium text-pink-700">
+                                      <Cake className="h-3 w-3" />
+                                      Birthday
+                                    </span>
+                                  )}
+
+                                  {review.isChristmas && (
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-1 text-[11px] font-medium text-green-700">
+                                      <TreePine className="h-3 w-3" />
+                                      Christmas
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Review */}
+                          <div>
+                            <p className="text-sm leading-6 text-zinc-700">
+                              {review.message}
+                            </p>
+                          </div>
+
+                          {/* Engagement */}
+                          <div className="flex gap-4 md:block">
+                            <div className="flex items-center gap-1.5 text-sm text-zinc-500">
+                              <ThumbsUp className="h-4 w-4" />
+
+                              <span className="tabular-nums">
+                                {review.likes.toLocaleString()}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 text-sm text-zinc-500 md:mt-2">
+                              <Heart className="h-4 w-4" />
+
+                              <span className="tabular-nums">
+                                {review.hearts.toLocaleString()}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Date */}
+                          <div>
+                            <p className="text-sm text-zinc-700">
+                              {formatDate(review.createdAt)}
+                            </p>
+                          </div>
+
+                          {/* Delete */}
+                          <div className="flex md:justify-end">
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(review)}
+                              disabled={deletingId === review.id}
+                              className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              {deletingId === review.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-4 w-4" />
+                              )}
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 
