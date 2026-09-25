@@ -223,7 +223,7 @@ export function ReviewWall({
         <div
           className="absolute inset-0 pointer-events-none bg-[#F3CED5] bg-cover bg-bottom bg-no-repeat"
           style={{
-            backgroundImage: `url("${wallpaperUrl || "/background.png"}")`,
+            backgroundImage: `url("${wallpaperUrl}")`,
           }}
         />
 
