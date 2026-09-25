@@ -451,7 +451,7 @@ export default function AdminReviewsPage() {
                                   {review.isChristmas && (
                                     <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-1 text-[11px] font-medium text-green-700">
                                       <TreePine className="h-3 w-3" />
-                                      Christmas
+                                      Special Day
                                     </span>
                                   )}
                                 </div>
