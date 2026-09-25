@@ -48,3 +48,28 @@ export const reviews = pgTable("reviews", {
     .defaultNow()
     .notNull(),
 });
+
+export const wallpaper = pgTable("wallpaper", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  wallpaperUrl: text("wallpaper_url").notNull(),
+  updatedAt: timestamp("updated_at", {
+    withTimezone: true,
+  })
+    .defaultNow()
+    .notNull(),
+});
+
+export const motivationalQuotes = pgTable("motivational_quotes", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  quote: text("quote").notNull(),
+  createdAt: timestamp("created_at", {
+    withTimezone: true,
+  })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", {
+    withTimezone: true,
+  })
+    .defaultNow()
+    .notNull(),
+});

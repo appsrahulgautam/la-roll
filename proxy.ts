@@ -9,23 +9,23 @@ const JWT_SECRET = new TextEncoder().encode(
 export async function proxy(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
-  // // --- 1. ADMIN PANEL PROTECTION ---
-  // if (path.startsWith("/admin")) {
-  //   const adminToken = req.cookies.get("admin_token")?.value;
+  // --- 1. ADMIN PANEL PROTECTION ---
+  if (path.startsWith("/admin")) {
+    const adminToken = req.cookies.get("admin_token")?.value;
 
-  //   if (!adminToken) {
-  //     return NextResponse.redirect(new URL("/login/admin", req.url));
-  //   }
+    if (!adminToken) {
+      return NextResponse.redirect(new URL("/login/admin", req.url));
+    }
 
-  //   try {
-  //     // Note: Admin token might have a different secret if set in a different app,
-  //     // but assuming it uses the same JWT_SECRET for now.
-  //     await jwtVerify(adminToken, JWT_SECRET);
-  //     return NextResponse.next();
-  //   } catch (err) {
-  //     return NextResponse.redirect(new URL("/login/admin", req.url));
-  //   }
-  // }
+    try {
+      // Note: Admin token might have a different secret if set in a different app,
+      // but assuming it uses the same JWT_SECRET for now.
+      await jwtVerify(adminToken, JWT_SECRET);
+      return NextResponse.next();
+    } catch (err) {
+      return NextResponse.redirect(new URL("/login/admin", req.url));
+    }
+  }
 
   // // --- 2. CANVASSER DASHBOARD PROTECTION ---
   // if (path.startsWith("/dashboard")) {
