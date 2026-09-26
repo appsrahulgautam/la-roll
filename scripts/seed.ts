@@ -5,11 +5,11 @@ import { admins } from "../db/schema";
 import bcrypt from "bcryptjs";
 
 async function main() {
-  const hashed = await bcrypt.hash("admin1234", 10);
+  const hashed = await bcrypt.hash("Laroll@99799030", 10);
 
   await db.insert(admins).values({
     id: crypto.randomUUID(),
-    email: "admin@gmail.com",
+    email: "underrated.oman@gmail.com",
     password: hashed,
   });
 
