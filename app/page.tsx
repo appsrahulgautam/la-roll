@@ -66,7 +66,7 @@ export default async function HomePage() {
 
       {/* Main Review Wall section */}
       <section className="relative flex flex-1 w-full items-center justify-center overflow-y-auto md:overflow-hidden pt-2 pb-2 md:pt-10 md:pb-8">
-        <ReviewWall reviews={reviewsData} />
+        <ReviewWall />
       </section>
     </main>
   );

@@ -154,6 +154,18 @@ export function HeaderBanner({ initialCount = 0 }: Props) {
           }
         },
       )
+      .on(
+        "postgres_changes",
+        {
+          event: "DELETE",
+          schema: "public",
+          table: "reviews",
+        },
+        () => {
+          // Re-query database to ensure accurate today's count after a deletion
+          fetchDailyCount();
+        },
+      )
       .subscribe((status) => {
         console.log("Header reviews realtime:", status);
       });
