@@ -334,7 +334,7 @@ export function ReviewWall({
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
-        setMaxCharacters(3);
+        setMaxCharacters(5);
       } else {
         setMaxCharacters(7);
       }
